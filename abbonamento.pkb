@@ -34,7 +34,7 @@ begin
       modGUI.inserisciBottoneReset('RESET');
       modGUI.inserisciBottoneForm('CONTINUA');
   modGui.chiudiForm;
-
+--sdsd
   modGUI.chiudiDiv;
  modGUI.chiudiPagina;
 
