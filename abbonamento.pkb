@@ -264,6 +264,9 @@ begin
     modGUI.chiudiForm;
 
       c:=0;
+      select count(*) into c
+        from AbbonamentiVeicoli
+        where AbbonamentiVeicoli.idAbbonamento = abbonamento;
         modGUI.aCapo;
         modGUI.apriIntestazione(1);
             modGUI.inserisciTesto('Lista Veicoli');
@@ -276,7 +279,9 @@ begin
               modgui.intestazionetabella('Produttore');
               modgui.intestazionetabella('Modello');
               modgui.intestazionetabella('Targa');
-              modgui.intestazionetabella('Inserisci');
+              if c< v_maxveicoli then
+                modgui.intestazionetabella('Inserisci');
+              end if;
               modgui.intestazionetabella('Rimuovi');
               loop
                 modgui.apririgatabella;
@@ -291,16 +296,20 @@ begin
                 modgui.chiudielementotabella;
                 select count(*) into v_count from AbbonamentiVeicoli where idAbbonamento=abbonamento and idVeicolo=r_veicolo.idVeicolo;
                     if v_count = 0 then
-                        modGUI.apriElementoTabella;
-                        modGui.inserisciPenna('abbonamento.Pagamento_Inserimento_veicolo', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abbonamento );
-                        modgui.chiudiElementotabella;
+                        if c< v_maxveicoli then
+                          modGUI.apriElementoTabella;
+                          modGui.inserisciPenna('abbonamento.Pagamento_Inserimento_veicolo', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abbonamento );
+                          modgui.chiudiElementotabella;
+                        end if;
                         modGUI.apriElementoTabella;
                         modgui.inserisciTesto('non presente');
                         modgui.chiudiElementotabella;
                     else
-                        modGUI.apriElementoTabella;
-                        modGui.InserisciTesto('presente');
-                        modgui.chiudiElementotabella;
+                        if c< v_maxveicoli then
+                            modGUI.apriElementoTabella;
+                            modGui.InserisciTesto('presente');
+                            modgui.chiudiElementotabella;
+                        end if;
                         modGUI.apriElementoTabella;
                         modGui.inserisciPenna('Rimuovi_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abbonamento);
                         modgui.chiudiElementotabella;
@@ -309,22 +318,21 @@ begin
                 modgui.chiudirigatabella;
               fetch c_veicoli_prop into r_veicolo;
               exit when c_veicoli_prop%NotFound;
-              c:=c+1;
+              --c:=c+1;
               end loop;
           else
              modGUI.apriIntestazione(3);
                  modGUI.inserisciTesto('Lista Veicoli proprietario vuota');
              modGUI.chiudiIntestazione(3);
           end if;
-    if c=0
-      then
-        modgui.apririgatabella;
-          modGUI.aprielementotabella;
-            modGUI.elementotabella('Nessun Veicolo collegato');
-          modGUI.chiudielementotabella;
-        modGUI.chiudirigatabella;
-    end if;
+
     modGUI.chiuditabella;
+        if c=v_maxveicoli
+      then
+        modGUI.apriIntestazione(1);
+        modGUI.inserisciTesto('raggiunto limite massimo veicoli');
+        modGUI.chiudiIntestazione(1);
+    end if;
   modGUI.chiudiPagina;
 end Abbonamento_Center;
 
@@ -532,7 +540,7 @@ end checkVeicolo;
 
 procedure checkDelegati(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2, 
+  nome varchar2,
   ruolo varchar2
 )
 is
@@ -543,7 +551,7 @@ is
     join TipiAbbonamenti on Abbonamenti.idTipoAbbonamento =tipiAbbonamenti.idTipoAbbonamento
     where abbonamenti.idAbbonamento in (
         select AbbonamentiClienti.idAbbonamento
-        from AbbonamentiClienti 
+        from AbbonamentiClienti
             join Clienti on AbbonamentiClienti.idCliente = Clienti.idCliente
             join Sessioni on Clienti.idPersona = Sessioni.idPersona
         where Sessioni.idSessione =id_Sessione)
@@ -598,12 +606,12 @@ begin
             exit when c_abb_ass%NotFound;
           end loop;
           modGUI.chiuditabella;
-        else 
+        else
           modGUI.apriIntestazione(3);
               modGUI.inserisciTesto('Non sei collegato a nessun Abbonamento');
           modGUI.chiudiIntestazione(3);
         end if;
-      modGUI.chiudiDiv;       
+      modGUI.chiudiDiv;
   modGUI.chiudiPagina;
 end checkDelegati;
 
