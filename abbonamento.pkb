@@ -532,27 +532,23 @@ end checkVeicolo;
 
 procedure checkDelegati(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2,
+  nome varchar2, 
   ruolo varchar2
 )
 is
   cursor c_abb_ass is (
-      select TipiAbbonamenti.TipoAbbonamento, Abbonamenti.DataFine, Abbonamenti.idAbbonamento
-      from Sessioni, Clienti, AbbonamentiClienti, Abbonamenti, TipiAbbonamenti
-      where id_Sessione = Sessioni.idSessione and
-            Sessioni.idPersona = Clienti.idPersona and
-            Clienti.idCliente = AbbonamentiClienti.idCliente and
-            AbbonamentiClienti.idAbbonamento = Abbonamenti.idAbbonamento and
-            Abbonamenti.idTipoAbbonamento = TipiAbbonamenti.idTipoAbbonamento);
+    select abbonamenti.idAbbonamento, persone.nome, persone.cognome, TipiAbbonamenti.TipoAbbonamento, Abbonamenti.DataFine
+    from Abbonamenti join Clienti on Abbonamenti.idCliente = Clienti.idCliente
+    join Persone on Persone.idPersona =Clienti.idPersona
+    join TipiAbbonamenti on Abbonamenti.idTipoAbbonamento =tipiAbbonamenti.idTipoAbbonamento
+    where abbonamenti.idAbbonamento in (
+        select AbbonamentiClienti.idAbbonamento
+        from AbbonamentiClienti 
+            join Clienti on AbbonamentiClienti.idCliente = Clienti.idCliente
+            join Sessioni on Clienti.idPersona = Sessioni.idPersona
+        where Sessioni.idSessione =id_Sessione)
+        );
   r_abb c_abb_ass%RowType;
-  cursor c_proprietario is (
-      select Persone.Cognome, Persone.Nome
-        from Abbonamenti, AbbonamentiClienti, Clienti, Persone
-       where r_abb.idAbbonamento = Abbonamenti.idAbbonamento and
-            Abbonamenti.idAbbonamento = AbbonamentiClienti.idAbbonamento and
-            AbbonamentiClienti.idCliente = Clienti.idCliente and
-            Clienti.idPersona = Persone.idPersona);
-  r_prop c_proprietario%RowType;
   currentdata date;
   scadenza number;
   dataf Abbonamenti.DataFine%TYPE;
@@ -565,8 +561,6 @@ begin
       modGUI.apriDiv;
         open c_abb_ass;
         fetch c_abb_ass into r_abb;
-        open c_proprietario;
-        fetch c_proprietario into r_prop;
         if c_abb_ass%Found then
           modgui.apritabella;
           modgui.intestazionetabella('Cognome Possessore');
@@ -575,39 +569,41 @@ begin
           modgui.intestazionetabella('Tempo Rimanente');
           modgui.intestazionetabella('Veicoli Collegati');
           loop
-            modgui.apririgatabella;
-              modGUI.apriElementoTabella;
-                  modgui.inseriscitesto(r_prop.Cognome);
-              modgui.chiudielementotabella;
-              modGUI.apriElementoTabella;
-                  modgui.inseriscitesto(r_prop.Nome);
-              modgui.chiudielementotabella;
-              modGUI.apriElementoTabella;
-                  modgui.inseriscitesto(r_abb.TipoAbbonamento);
-              modgui.chiudielementotabella;
-              modGUI.apriElementoTabella;
-                currentdata:=to_date(CURRENT_DATE, 'dd-Mon-yy');
-                dataf:=r_abb.DataFine;
-                select dataf - currentdata
-                  into scadenza
-                  from dual;
-                modgui.inseriscitesto(scadenza || ' giorni');
-              modgui.chiudielementotabella;
-              modGUI.apriElementoTabella;
-                  modgui.inserisciLente('VeicoliCollegati', id_Sessione, nome, ruolo, r_abb.idAbbonamento);
-              modgui.chiudielementotabella;
-            modgui.chiudirigatabella;
+            currentdata:=to_date(CURRENT_DATE, 'dd-Mon-yy');
+            dataf:=r_abb.DataFine;
+            select dataf - currentdata
+              into scadenza
+              from dual;
+            if scadenza>0
+              then
+              modgui.apririgatabella;
+                modGUI.apriElementoTabella;
+                    modgui.inseriscitesto(r_abb.Cognome);
+                modgui.chiudielementotabella;
+                modGUI.apriElementoTabella;
+                    modgui.inseriscitesto(r_abb.Nome);
+                modgui.chiudielementotabella;
+                modGUI.apriElementoTabella;
+                    modgui.inseriscitesto(r_abb.TipoAbbonamento);
+                modgui.chiudielementotabella;
+                modGUI.apriElementoTabella;
+                  modgui.inseriscitesto(scadenza || ' giorni');
+                modgui.chiudielementotabella;
+                modGUI.apriElementoTabella;
+                    modgui.inserisciLente('VeicoliCollegati', id_Sessione, nome, ruolo, r_abb.idAbbonamento);
+                modgui.chiudielementotabella;
+              modgui.chiudirigatabella;
+            end if;
             fetch c_abb_ass into r_abb;
-            fetch c_proprietario into r_prop;
             exit when c_abb_ass%NotFound;
           end loop;
           modGUI.chiuditabella;
-        else
+        else 
           modGUI.apriIntestazione(3);
               modGUI.inserisciTesto('Non sei collegato a nessun Abbonamento');
           modGUI.chiudiIntestazione(3);
         end if;
-      modGUI.chiudiDiv;
+      modGUI.chiudiDiv;       
   modGUI.chiudiPagina;
 end checkDelegati;
 
