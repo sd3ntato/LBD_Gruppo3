@@ -1,11 +1,11 @@
 create or replace package body abbonamento as
-  
+
 procedure sottoscrizioneAbbonamento(
-  id_Sessione Sessioni.idSessione%TYPE, 
-  nome varchar2, 
+  id_Sessione Sessioni.idSessione%TYPE,
+  nome varchar2,
   ruolo varchar2
-) 
-is  
+)
+is
 begin
  modGUI.apriPagina('HoC | Sottoscrizione Abbonamento', id_Sessione, nome, ruolo);
 
@@ -21,8 +21,8 @@ begin
       modGUI.inserisciTesto('Tipo Abbonamento: ');
       modGUI.aCapo;
       modGUI.apriSelect('Abbonamento', 'abbonamento');
-      for tipoabbonamenti in (select idTipoAbbonamento from tipiabbonamenti)    
-      loop                
+      for tipoabbonamenti in (select idTipoAbbonamento from tipiabbonamenti)
+      loop
       modGUI.inserisciOpzioneSelect(tipoabbonamenti.idtipoabbonamento, tipoabbonamenti.idtipoabbonamento, false);
       end loop;
       modGUI.chiudiSelect;
@@ -42,11 +42,11 @@ end sottoscrizioneAbbonamento;
 
 procedure checkAbbonamento(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2, 
+  nome varchar2,
   ruolo varchar2,
-  abbonamento TipiAbbonamenti.idTipoAbbonamento%TYPE, 
+  abbonamento TipiAbbonamenti.idTipoAbbonamento%TYPE,
   data varchar2
-) 
+)
 is
   datai Abbonamenti.DataInizio%TYPE;
   dataf Abbonamenti.DataFine%TYPE;
@@ -59,19 +59,19 @@ begin
   datai:=to_date(data, 'yyyy/mm/dd', 'NLS_DATE_LANGUAGE = ITALIAN');
 
   currentdata:=to_date(CURRENT_DATE, 'yyyy/mm/dd');
-  
+
   if datai >= currentdata
     then
-      select durata, costo 
+      select durata, costo
       into durataAbb, costoAbb
       from tipiabbonamenti
       where abbonamento = idtipoabbonamento;
-          
+
       dataf:=datai+durataAbb;
 
       select Clienti.idCliente, CartaDiCredito
       into idClienteAbb, creditCard
-      from sessioni, persone, clienti 
+      from sessioni, persone, clienti
       where id_Sessione = sessioni.idSessione and
             sessioni.idPersona = persone.idPersona and
             persone.idPersona = clienti.idPersona;
@@ -132,7 +132,7 @@ end checkAbbonamento;
 
 procedure nuovoAbb(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2, 
+  nome varchar2,
   ruolo varchar2,
   datai Abbonamenti.DataInizio%TYPE,
   dataf Abbonamenti.DataFine%TYPE,
@@ -140,7 +140,7 @@ procedure nuovoAbb(
   idClienteAbb number,
   abbonamento TipiAbbonamenti.idTipoAbbonamento%TYPE,
   creditCard char
-) 
+)
 is
 begin
   INSERT INTO Abbonamenti (idAbbonamento, DataInizio, DataFine, CostoEffettivo, idCliente, idTipoAbbonamento)
@@ -160,11 +160,11 @@ end nuovoAbb;
 
 procedure Abbonamento_Center(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2, 
+  nome varchar2,
   ruolo varchar2,
   abbonamento Abbonamenti.idAbbonamento%TYPE
-) 
-is  
+)
+is
   idClienteAbb Clienti.idCliente%TYPE;
   v_count integer;
   cursor c_veicoli_prop is (
@@ -178,12 +178,12 @@ is
   v_TipoAbbonamento TipiAbbonamenti.idTipoAbbonamento%TYPE;
   datai Abbonamenti.DataInizio%TYPE;
   dataf Abbonamenti.DataFine%TYPE;
-  costoAbb Abbonamenti.CostoEffettivo%TYPE; 
+  costoAbb Abbonamenti.CostoEffettivo%TYPE;
   creditCard Clienti.CartaDiCredito%TYPE;
 begin
   select Abbonamenti.idTipoAbbonamento, Abbonamenti.DataInizio, Abbonamenti.DataFine, Abbonamenti.CostoEffettivo, Clienti.CartaDiCredito, Abbonamenti.idCliente
     into v_TipoAbbonamento, datai, dataf, costoAbb, creditCard, idClienteAbb
-    from Abbonamenti 
+    from Abbonamenti
         join Clienti on Abbonamenti.idCliente = Clienti.idCliente
    where idabbonamento = abbonamento;
 
@@ -191,7 +191,7 @@ begin
       into v_maxveicoli, v_maxclienti
       from tipiabbonamenti
       where v_TipoAbbonamento = idtipoabbonamento;
-  
+
   modGUI.apriPagina('HoC | Pagamento', id_Sessione, nome, ruolo);
     modGUI.aCapo;
     modGUI.apriIntestazione(3);
@@ -210,19 +210,19 @@ begin
         modGUI.aprielementotabella;
         modGUI.elementotabella(dataf);
         modGUI.chiudielementotabella;
-      modGui.chiudirigatabella;        
+      modGui.chiudirigatabella;
       modgui.apririgatabella;
         modgui.intestazionetabella('Costo Abbonamento');
         modGUI.aprielementotabella;
         modGUI.elementotabella(costoAbb||' €');
         modGUI.chiudielementotabella;
-      modGui.chiudirigatabella;   
-      modgui.apririgatabella;     
+      modGui.chiudirigatabella;
+      modgui.apririgatabella;
         modgui.intestazionetabella('Carta di Credito utilizzata');
         modGUI.aprielementotabella;
         modGUI.elementotabella(creditCard);
         modGUI.chiudielementotabella;
-      modGui.chiudirigatabella;   
+      modGui.chiudirigatabella;
     modGUI.chiuditabella;
 
     modGui.apritabella;
@@ -235,9 +235,9 @@ begin
         from Abbonamenti, AbbonamentiClienti, Clienti, personel
         where abbonamento = Abbonamenti.idAbbonamento and
               Abbonamenti.idAbbonamento = AbbonamentiClienti.idAbbonamento and
-              AbbonamentiClienti.idCliente = clienti.idCliente and 
-              clienti.idPersona = personel.idPersona)    
-      loop                
+              AbbonamentiClienti.idCliente = clienti.idCliente and
+              clienti.idPersona = personel.idPersona)
+      loop
         modgui.apririgatabella;
           modGUI.aprielementotabella;
             modGUI.elementotabella(clienti.user_name);
@@ -271,13 +271,13 @@ begin
         modGUI.apriDiv;
           open c_veicoli_prop;
           fetch c_veicoli_prop into r_veicolo;
-          if c_veicoli_prop%Found then 
+          if c_veicoli_prop%Found then
               modgui.apritabella;
               modgui.intestazionetabella('Produttore');
               modgui.intestazionetabella('Modello');
               modgui.intestazionetabella('Targa');
               modgui.intestazionetabella('Inserisci');
-              modgui.intestazionetabella('Rimuovi');            
+              modgui.intestazionetabella('Rimuovi');
               loop
                 modgui.apririgatabella;
                 modGUI.apriElementoTabella;
@@ -292,7 +292,7 @@ begin
                 select count(*) into v_count from AbbonamentiVeicoli where idAbbonamento=abbonamento and idVeicolo=r_veicolo.idVeicolo;
                     if v_count = 0 then
                         modGUI.apriElementoTabella;
-                        modGui.inserisciPenna('Inserisci_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abbonamento );
+                        modGui.inserisciPenna('abbonamento.Pagamento_Inserimento_veicolo', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abbonamento );
                         modgui.chiudiElementotabella;
                         modGUI.apriElementoTabella;
                         modgui.inserisciTesto('non presente');
@@ -303,15 +303,15 @@ begin
                         modgui.chiudiElementotabella;
                         modGUI.apriElementoTabella;
                         modGui.inserisciPenna('Rimuovi_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abbonamento);
-                        modgui.chiudiElementotabella;                    
+                        modgui.chiudiElementotabella;
                     end if;
                 modgui.chiudielementotabella;
-                modgui.chiudirigatabella;   
+                modgui.chiudirigatabella;
               fetch c_veicoli_prop into r_veicolo;
               exit when c_veicoli_prop%NotFound;
               c:=c+1;
               end loop;
-          else 
+          else
              modGUI.apriIntestazione(3);
                  modGUI.inserisciTesto('Lista Veicoli proprietario vuota');
              modGUI.chiudiIntestazione(3);
@@ -330,10 +330,10 @@ end Abbonamento_Center;
 
 procedure aggiungiUtenti(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2, 
+  nome varchar2,
   ruolo varchar2,
   abbonamento Abbonamenti.idAbbonamento%TYPE
-) 
+)
 is
 begin
   modGUI.apriPagina('HoC | Aggiungi Utenti', id_Sessione, nome, ruolo);
@@ -357,13 +357,13 @@ end aggiungiUtenti;
 
 procedure checkUtente(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2, 
+  nome varchar2,
   ruolo varchar2,
-  abbonamento Abbonamenti.idAbbonamento%TYPE, 
+  abbonamento Abbonamenti.idAbbonamento%TYPE,
   username Personel.user_name%TYPE
-) 
+)
 is
-  idClienteAss Clienti.idCliente%TYPE;  
+  idClienteAss Clienti.idCliente%TYPE;
   i int;
 begin
 
@@ -378,10 +378,10 @@ begin
     from AbbonamentiClienti
    where abbonamento = idAbbonamento and
           idClienteAss = idCliente;
-  
 
-  if i=0 
-    then 
+
+  if i=0
+    then
       INSERT INTO AbbonamentiClienti (idAbbonamento, idCliente)
       VALUES (abbonamento, idClienteAss);
       Abbonamento_Center(id_Sessione, nome, ruolo, abbonamento);
@@ -427,12 +427,12 @@ end checkUtente;
 
 procedure aggiungiVeicoli(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2, 
+  nome varchar2,
   ruolo varchar2,
   abbonamento Abbonamenti.idAbbonamento%TYPE
-) 
+)
 is
-  
+
 begin
   modGUI.apriPagina('HoC | Aggiungi Veicoli', id_Sessione, nome, ruolo);
     modGUI.aCapo;
@@ -455,11 +455,11 @@ end aggiungiVeicoli;
 
 procedure checkVeicolo(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2, 
+  nome varchar2,
   ruolo varchar2,
   abbonamento Abbonamenti.idAbbonamento%TYPE,
   v_targa Veicoli.Targa%TYPE
-) 
+)
 is
   idVeicoloAss Veicoli.idVeicolo%TYPE;
   idClienteAbb Clienti.idCliente%TYPE;
@@ -484,7 +484,7 @@ begin
           idVeicoloAss = idVeicolo;
 
   if i=0
-    then 
+    then
       INSERT INTO AbbonamentiVeicoli (idAbbonamento, idVeicolo)
       VALUES (abbonamento, idVeicoloAss);
       Abbonamento_Center(id_Sessione, nome, ruolo, abbonamento);
@@ -507,7 +507,7 @@ begin
               modGUI.chiudiForm;
       modGUI.chiudiPagina;
   end if;
-  
+
 Exception
   when no_data_found then
     modGUI.apriPagina('HoC | Veicolo non presente', id_Sessione, nome, ruolo);
@@ -532,7 +532,7 @@ end checkVeicolo;
 
 procedure checkDelegati(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2, 
+  nome varchar2,
   ruolo varchar2
 )
 is
@@ -602,13 +602,146 @@ begin
             exit when c_abb_ass%NotFound;
           end loop;
           modGUI.chiuditabella;
-        else 
+        else
           modGUI.apriIntestazione(3);
               modGUI.inserisciTesto('Non sei collegato a nessun Abbonamento');
           modGUI.chiudiIntestazione(3);
         end if;
-      modGUI.chiudiDiv;       
+      modGUI.chiudiDiv;
   modGUI.chiudiPagina;
 end checkDelegati;
+
+procedure Pagamento_Inserimento_veicolo(id_Sessione int, nome varchar2, ruolo varchar2, idRiga varchar2)
+as
+    Veicolo number(38,0);
+    Abbonamento number(38,0);
+    str1 varchar2(200); str2 varchar2(200);
+    v_count integer;
+    v_max TipiAbbonamenti.MaxVeicoli%type;
+    v_costo TipiAbbonamenti.Costo%type;
+    max_veicoli_raggiunto exception;
+    pragma exception_init (max_veicoli_raggiunto,-2001);
+
+begin
+    SELECT (REGEXP_SUBSTR (idRiga, '(\S+)')) into str1  FROM dual ;
+    SELECT REGEXP_SUBSTR (idRiga, '(\S+)',1,2) into str2 FROM dual ;
+    Veicolo := to_number(str1);
+    Abbonamento := to_number(str2);
+    modGUI.apriPagina('HoC | Pagamento', id_Sessione, nome, ruolo);
+    select count(*) into v_count
+        from AbbonamentiVeicoli
+        where idAbbonamento= Abbonamento and idVeicolo= Veicolo;
+    if v_count != 0 then
+        modgui.esitoOperazione('ko','veicolo gia presente');
+    else
+        select tipiAbbonamenti.MaxVeicoli, TipiAbbonamenti.costo
+            into v_max, v_costo
+            from TipiAbbonamenti join Abbonamenti on Abbonamenti.idTipoAbbonamento = TipiAbbonamenti.idTipoAbbonamento
+            where abbonamenti.idAbbonamento = Abbonamento;
+        select count(*)
+            into v_count
+            from AbbonamentiVeicoli
+        where AbbonamentiVeicoli.idAbbonamento = Abbonamento;
+        if v_count<= v_max then
+            modgui.apriform(azione=>'abbonamento.Inserisci_Veicolo_abbonamento');
+            modGUI.ApriIntestazione(3);
+                modGUI.inserisciTesto('prezzo da pagare per inserire veicolo: '||v_costo);
+            modGUI.ChiudiIntestazione(3);
+            modGUI.inserisciInputHidden('id_Sessione',id_Sessione);
+            modGUI.inserisciInputHidden('nome',nome);
+            modGUI.inserisciInputHidden('ruolo',ruolo);
+            modGUI.inserisciInputHidden('Abb',Abbonamento);
+            modGUI.inserisciInputHidden('Vei',Veicolo);
+            modgui.inseriscibottoneform(testo=>'paga');
+            modgui.chiudiform;
+        else
+            modGUI.esitoOperazione('ko','maxVeicoliRaggiunto');
+        end if;
+    end if;
+    modGui.aCapo;
+            modgui.apriform(azione=>'abbonamento.Abbonamento_Center');
+            modGUI.inserisciInputHidden('id_Sessione',id_Sessione);
+            modGUI.inserisciInputHidden('nome',nome);
+            modGUI.inserisciInputHidden('ruolo',ruolo);
+            modGUI.inserisciInputHidden('abbonamento',Abbonamento);
+            modgui.inseriscibottoneform(testo=>'indietro');
+            modgui.chiudiform;
+
+end;
+
+procedure Inserisci_veicolo_abbonamento(id_Sessione int, nome varchar2, ruolo varchar2, Abb Abbonamenti.idAbbonamento%type, Vei Veicoli.idVeicolo%type)
+as
+    str1 varchar2(200); str2 varchar2(200);
+    v_count integer;
+    v_ok varchar(20);
+    max_veicoli_raggiunto exception;
+    pragma exception_init (max_veicoli_raggiunto,-2001);
+
+begin
+/*
+    SELECT (REGEXP_SUBSTR (idRiga, '(\S+)')) into str1  FROM dual ;
+    SELECT REGEXP_SUBSTR (idRiga, '(\S+)',1,2) into str2 FROM dual ;
+    Veicolo := to_number(str1);
+    Abbonamento := to_number(str2);
+*/
+    modGUI.apriPagina('HoC | Esito manipolazione veicoli abbonamento', id_Sessione, nome, ruolo);
+    select count(*) into v_count
+        from AbbonamentiVeicoli
+        where idAbbonamento= Abb and idVeicolo= Vei;
+    if v_count != 0 then
+        --v_ok:='nok';
+        modgui.esitoOperazione('ko','veicolo gia presente');
+    else
+        insert into AbbonamentiVeicoli values ( Abb, Vei);
+        --v_ok:='ok'
+        modgui.esitoOperazione('ok','operazione effettuata');
+    end if;
+    modGUI.apriDiv(centrato=>true);
+        modgui.inseriscibottone(id_Sessione,nome,ruolo,'home','modgui.creaHome','defFormButton');
+    modGUI.chiudiDiv;
+        modgui.apriform(azione=>'abbonamento.Abbonamento_Center');
+    modGUI.inserisciInputHidden('id_Sessione',id_Sessione);
+    modGUI.inserisciInputHidden('nome',nome);
+    modGUI.inserisciInputHidden('ruolo',ruolo);
+    modGUI.inserisciInputHidden('abbonamento',Abb);
+    modgui.inseriscibottoneform(testo=>'riepilogo abbonamento');
+    modgui.chiudiform;
+
+
+    --modgui.inseriscibottone(id_Sessione,nome,ruolo,'ancora','abbonamento.Abbonamento_Center','defFormButton');
+    --marianiv.Lista_Veicoli_abbonamento(id_Sessione,nome,ruolo,v_ok);
+exception
+    when max_veicoli_raggiunto then modgui.esitoOperazione('ko','troppi veicoli');
+    modgui.inseriscibottone(id_Sessione,nome,ruolo,'home','modgui.creaHome','defFormButton');
+    modgui.inseriscibottone(id_Sessione,nome,ruolo,'ancora','abbonamento.Abbonamento_Center','defFormButton');
+end;
+
+procedure Rimuovi_veicolo_abbonamento(id_Sessione int, nome varchar2, ruolo varchar2, idRiga varchar2)
+as
+    Veicolo number(38,0);
+    Abbonamento number(38,0);
+    str1 varchar2(200); str2 varchar2(200);
+    cursor cVei(Abb number ,Vei number ) is
+        select AbbonamentiVeicoli.idAbbonamento
+        from AbbonamentiVeicoli
+        where idAbbonamento= Abb and idVeicolo= Vei;
+    v_ok varchar2(10);
+begin
+    SELECT (REGEXP_SUBSTR (idRiga, '(\S+)')) into str1  FROM dual ;
+    SELECT REGEXP_SUBSTR (idRiga, '(\S+)',1,2) into str2 FROM dual ;
+    Veicolo := to_number(str1);
+    Abbonamento := to_number(str2);
+    modGUI.apriPagina('HoC | Esito manipolazione veicoli abbonamento', id_Sessione, nome, ruolo);
+    open cVei(Abbonamento,Veicolo) ;
+    fetch cVei into Abbonamento;
+    if sql%NotFound then modgui.esitoOperazione('ko','veicolo non presente');
+    else
+        delete from AbbonamentiVeicoli where idVeicolo= Veicolo and idAbbonamento=Abbonamento ;
+        modgui.esitoOperazione('ok','veicolo eliminato');
+    end if;
+    --marianiv.Lista_Veicoli_abbonamento(id_Sessione,nome,ruolo,v_ok);
+    modgui.inseriscibottone(id_Sessione,nome,ruolo,'home','modgui.creaHome','defFormButton');
+    modgui.inseriscibottone(id_Sessione,nome,ruolo,'ancora','Lista_veicoli_abbonamento','defFormButton');
+end;
 
 end abbonamento;
