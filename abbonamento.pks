@@ -63,5 +63,11 @@ procedure checkVeicolo(
   v_targa Veicoli.Targa%TYPE
 );
 
+procedure checkDelegati(
+  id_Sessione Sessioni.idSessione%TYPE,
+  nome varchar2, 
+  ruolo varchar2
+);
+
 
 end abbonamento;
