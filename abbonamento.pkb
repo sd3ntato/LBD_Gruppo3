@@ -372,6 +372,7 @@ procedure checkUtente(
 )
 is
   idClienteAss Clienti.idCliente%TYPE;
+  idClienteAbb Clienti.idCliente%TYPE;
   i int;
 begin
 
@@ -381,36 +382,61 @@ begin
    where username = personel.user_name and
           personel.idPersona = Clienti.idPersona;
 
-  select count(*)
-    into i
-    from AbbonamentiClienti
-   where abbonamento = idAbbonamento and
-          idClienteAss = idCliente;
+  select Clienti.idCliente
+    into idClienteAbb
+    from Sessioni
+        join Clienti on Sessioni.idPersona = Clienti.idPersona
+   where Sessioni.idSessione = id_Sessione;
 
-
-  if i=0
-    then
-      INSERT INTO AbbonamentiClienti (idAbbonamento, idCliente)
-      VALUES (abbonamento, idClienteAss);
-      Abbonamento_Center(id_Sessione, nome, ruolo, abbonamento);
-    else
-      modGUI.apriPagina('HoC | Utente già collegato', id_Sessione, nome, ruolo);
-        modGui.esitoOperazione('KO', 'Utente già collegato');
-        modGui.apriForm('abbonamento.Abbonamento_Center');
-                modGui.inserisciinputHidden('id_Sessione', id_Sessione);
-                modGui.inserisciinputHidden('nome', nome);
-                modGui.inserisciinputHidden('ruolo', ruolo);
-                modGui.inserisciinputHidden('abbonamento', abbonamento);
-                modGUI.inserisciBottoneForm('RIEPILOGO ABBONAMENTO');
-        modGUI.chiudiForm;
-        modGui.apriForm('abbonamento.aggiungiUtenti');
-                modGui.inserisciinputHidden('id_Sessione', id_Sessione);
-                modGui.inserisciinputHidden('nome', nome);
-                modGui.inserisciinputHidden('ruolo', ruolo);
-                modGui.inserisciinputHidden('abbonamento', abbonamento);
-                modGUI.inserisciBottoneForm('AGGIUNGI UTENTI');
-              modGUI.chiudiForm;
+  if idClienteAbb=idClienteAss
+    then 
+      modGUI.apriPagina('HoC | Errore', id_Sessione, nome, ruolo);
+      modGui.esitoOperazione('KO', 'Sei già il proprietario');
+      modGui.apriForm('abbonamento.Abbonamento_Center');
+              modGui.inserisciinputHidden('id_Sessione', id_Sessione);
+              modGui.inserisciinputHidden('nome', nome);
+              modGui.inserisciinputHidden('ruolo', ruolo);
+              modGui.inserisciinputHidden('abbonamento', abbonamento);
+              modGUI.inserisciBottoneForm('RIEPILOGO ABBONAMENTO');
+      modGUI.chiudiForm;
+      modGui.apriForm('abbonamento.aggiungiUtenti');
+              modGui.inserisciinputHidden('id_Sessione', id_Sessione);
+              modGui.inserisciinputHidden('nome', nome);
+              modGui.inserisciinputHidden('ruolo', ruolo);
+              modGui.inserisciinputHidden('abbonamento', abbonamento);
+              modGUI.inserisciBottoneForm('AGGIUNGI UTENTI');
+            modGUI.chiudiForm;
       modGUI.chiudiPagina;
+    else
+      select count(*)
+        into i
+        from AbbonamentiClienti
+      where abbonamento = idAbbonamento and
+              idClienteAss = idCliente;
+      if i=0
+        then
+          INSERT INTO AbbonamentiClienti (idAbbonamento, idCliente)
+          VALUES (abbonamento, idClienteAss);
+          Abbonamento_Center(id_Sessione, nome, ruolo, abbonamento);
+        else
+          modGUI.apriPagina('HoC | Utente già collegato', id_Sessione, nome, ruolo);
+            modGui.esitoOperazione('KO', 'Utente già collegato');
+            modGui.apriForm('abbonamento.Abbonamento_Center');
+                    modGui.inserisciinputHidden('id_Sessione', id_Sessione);
+                    modGui.inserisciinputHidden('nome', nome);
+                    modGui.inserisciinputHidden('ruolo', ruolo);
+                    modGui.inserisciinputHidden('abbonamento', abbonamento);
+                    modGUI.inserisciBottoneForm('RIEPILOGO ABBONAMENTO');
+            modGUI.chiudiForm;
+            modGui.apriForm('abbonamento.aggiungiUtenti');
+                    modGui.inserisciinputHidden('id_Sessione', id_Sessione);
+                    modGui.inserisciinputHidden('nome', nome);
+                    modGui.inserisciinputHidden('ruolo', ruolo);
+                    modGui.inserisciinputHidden('abbonamento', abbonamento);
+                    modGUI.inserisciBottoneForm('AGGIUNGI UTENTI');
+                  modGUI.chiudiForm;
+          modGUI.chiudiPagina;
+      end if;
   end if;
 Exception
   when no_data_found then
