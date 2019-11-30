@@ -311,7 +311,7 @@ begin
                             modgui.chiudiElementotabella;
                         end if;
                         modGUI.apriElementoTabella;
-                        modGui.inserisciPenna('Rimuovi_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abbonamento);
+                        modGui.inserisciPenna('abbonamento.Rimuovi_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abbonamento);
                         modgui.chiudiElementotabella;
                     end if;
                 modgui.chiudielementotabella;
@@ -700,15 +700,22 @@ as
     str1 varchar2(200); str2 varchar2(200);
     v_count integer;
     v_max TipiAbbonamenti.MaxVeicoli%type;
+    v_area Aree.idArea%type;
     v_costo TipiAbbonamenti.Costo%type;
     max_veicoli_raggiunto exception;
     pragma exception_init (max_veicoli_raggiunto,-2001);
+    Area_non_trovata exception;
 
 begin
     SELECT (REGEXP_SUBSTR (idRiga, '(\S+)')) into str1  FROM dual ;
     SELECT REGEXP_SUBSTR (idRiga, '(\S+)',1,2) into str2 FROM dual ;
     Veicolo := to_number(str1);
     Abbonamento := to_number(str2);
+    v_area:= marianiv.Ass_area_min(Veicolo);
+    if v_area = null then raise Area_non_trovata; end if;
+    select Aree.CostoAbbonamento into v_costo
+        from Aree
+            where Aree.idArea =v_area;
     modGUI.apriPagina('HoC | Pagamento', id_Sessione, nome, ruolo);
     select count(*) into v_count
         from AbbonamentiVeicoli
@@ -716,8 +723,8 @@ begin
     if v_count != 0 then
         modgui.esitoOperazione('ko','veicolo gia presente');
     else
-        select tipiAbbonamenti.MaxVeicoli, TipiAbbonamenti.costo
-            into v_max, v_costo
+        select tipiAbbonamenti.MaxVeicoli
+            into v_max
             from TipiAbbonamenti join Abbonamenti on Abbonamenti.idTipoAbbonamento = TipiAbbonamenti.idTipoAbbonamento
             where abbonamenti.idAbbonamento = Abbonamento;
         select count(*)
@@ -734,6 +741,7 @@ begin
             modGUI.inserisciInputHidden('ruolo',ruolo);
             modGUI.inserisciInputHidden('Abb',Abbonamento);
             modGUI.inserisciInputHidden('Vei',Veicolo);
+            modGUI.inserisciInputHidden('Costo',v_costo);
             modgui.inseriscibottoneform(testo=>'paga');
             modgui.chiudiform;
         else
@@ -748,10 +756,11 @@ begin
             modGUI.inserisciInputHidden('abbonamento',Abbonamento);
             modgui.inseriscibottoneform(testo=>'indietro');
             modgui.chiudiform;
-
+    exception
+        when Area_non_trovata then modGUI.esitoOperazione('ko','il tuo veicolo non puo essere contenuto in nessuna area');
 end;
 
-procedure Inserisci_veicolo_abbonamento(id_Sessione int, nome varchar2, ruolo varchar2, Abb Abbonamenti.idAbbonamento%type, Vei Veicoli.idVeicolo%type)
+procedure Inserisci_veicolo_abbonamento(id_Sessione int, nome varchar2, ruolo varchar2, Abb Abbonamenti.idAbbonamento%type, Vei Veicoli.idVeicolo%type, Costo abbonamenti.CostoEffettivo%type)
 as
     str1 varchar2(200); str2 varchar2(200);
     v_count integer;
@@ -775,6 +784,7 @@ begin
         modgui.esitoOperazione('ko','veicolo gia presente');
     else
         insert into AbbonamentiVeicoli values ( Abb, Vei);
+        update abbonamenti set CostoEffettivo=CostoEffettivo+Costo where idAbbonamento=Abb;
         --v_ok:='ok'
         modgui.esitoOperazione('ok','operazione effettuata');
     end if;
@@ -808,22 +818,33 @@ as
         from AbbonamentiVeicoli
         where idAbbonamento= Abb and idVeicolo= Vei;
     v_ok varchar2(10);
+    v_costo Abbonamenti.CostoEffettivo%type;
 begin
     SELECT (REGEXP_SUBSTR (idRiga, '(\S+)')) into str1  FROM dual ;
     SELECT REGEXP_SUBSTR (idRiga, '(\S+)',1,2) into str2 FROM dual ;
     Veicolo := to_number(str1);
     Abbonamento := to_number(str2);
+    select Aree.costoAbbonamento into v_costo from Aree where idArea= (marianiv.Ass_area_min(veicolo));
     modGUI.apriPagina('HoC | Esito manipolazione veicoli abbonamento', id_Sessione, nome, ruolo);
     open cVei(Abbonamento,Veicolo) ;
     fetch cVei into Abbonamento;
     if sql%NotFound then modgui.esitoOperazione('ko','veicolo non presente');
     else
         delete from AbbonamentiVeicoli where idVeicolo= Veicolo and idAbbonamento=Abbonamento ;
+        update abbonamenti set CostoEffettivo=CostoEffettivo-v_costo where idAbbonamento=Abbonamento;
         modgui.esitoOperazione('ok','veicolo eliminato');
     end if;
     --marianiv.Lista_Veicoli_abbonamento(id_Sessione,nome,ruolo,v_ok);
-    modgui.inseriscibottone(id_Sessione,nome,ruolo,'home','modgui.creaHome','defFormButton');
-    modgui.inseriscibottone(id_Sessione,nome,ruolo,'ancora','Lista_veicoli_abbonamento','defFormButton');
+    modGUI.apriDiv(centrato=>true);
+        modgui.inseriscibottone(id_Sessione,nome,ruolo,'home','modgui.creaHome','defFormButton');
+    modGUI.chiudiDiv;
+        modgui.apriform(azione=>'abbonamento.Abbonamento_Center');
+    modGUI.inserisciInputHidden('id_Sessione',id_Sessione);
+    modGUI.inserisciInputHidden('nome',nome);
+    modGUI.inserisciInputHidden('ruolo',ruolo);
+    modGUI.inserisciInputHidden('abbonamento',Abbonamento);
+    modgui.inseriscibottoneform(testo=>'riepilogo abbonamento');
+    modgui.chiudiform;
 end;
 
 procedure ScegliAbbonamento( id_Sessione Sessioni.idSessione%TYPE, nome varchar2, ruolo varchar2)

@@ -91,7 +91,8 @@ procedure Inserisci_veicolo_abbonamento(
     nome varchar2,
     ruolo varchar2,
     Abb Abbonamenti.idAbbonamento%type,
-    Vei Veicoli.idVeicolo%type
+    Vei Veicoli.idVeicolo%type,
+    Costo abbonamenti.CostoEffettivo%type
 );
 
 procedure Rimuovi_veicolo_abbonamento(
