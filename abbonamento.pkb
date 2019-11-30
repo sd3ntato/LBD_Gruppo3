@@ -389,7 +389,7 @@ begin
    where Sessioni.idSessione = id_Sessione;
 
   if idClienteAbb=idClienteAss
-    then 
+    then
       modGUI.apriPagina('HoC | Errore', id_Sessione, nome, ruolo);
       modGui.esitoOperazione('KO', 'Sei già il proprietario');
       modGui.apriForm('abbonamento.Abbonamento_Center');
@@ -566,7 +566,7 @@ end checkVeicolo;
 
 procedure checkDelegati(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2, 
+  nome varchar2,
   ruolo varchar2
 )
 is
@@ -577,7 +577,7 @@ is
     join TipiAbbonamenti on Abbonamenti.idTipoAbbonamento =tipiAbbonamenti.idTipoAbbonamento
     where abbonamenti.idAbbonamento in (
         select AbbonamentiClienti.idAbbonamento
-        from AbbonamentiClienti 
+        from AbbonamentiClienti
             join Clienti on AbbonamentiClienti.idCliente = Clienti.idCliente
             join Sessioni on Clienti.idPersona = Sessioni.idPersona
         where Sessioni.idSessione =id_Sessione)
@@ -632,18 +632,18 @@ begin
             exit when c_abb_ass%NotFound;
           end loop;
           modGUI.chiuditabella;
-        else 
+        else
           modGUI.apriIntestazione(3);
               modGUI.inserisciTesto('Non sei collegato a nessun Abbonamento');
           modGUI.chiudiIntestazione(3);
         end if;
-      modGUI.chiudiDiv;       
+      modGUI.chiudiDiv;
   modGUI.chiudiPagina;
 end checkDelegati;
 
 procedure VeicoliCollegati(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2, 
+  nome varchar2,
   ruolo varchar2,
   idRiga Abbonamenti.idAbbonamento%TYPE
 )
@@ -825,5 +825,47 @@ begin
     modgui.inseriscibottone(id_Sessione,nome,ruolo,'home','modgui.creaHome','defFormButton');
     modgui.inseriscibottone(id_Sessione,nome,ruolo,'ancora','Lista_veicoli_abbonamento','defFormButton');
 end;
+
+procedure ScegliAbbonamento( id_Sessione Sessioni.idSessione%TYPE, nome varchar2, ruolo varchar2)
+is
+    v_idCliente Clienti.idCliente%type;
+    cursor c_abbs (cliente Clienti.idCliente%type) is (
+     select abbonamenti.idAbbonamento, abbonamenti.DATAFINE, TipiAbbonamenti.TipoAbbonamento
+      from abbonamenti join Clienti on Abbonamenti.idCliente= Clienti.idCliente
+      join TipiAbbonamenti on abbonamenti.idTipoAbbonamento= tipiAbbonamenti.idTipoAbbonamento
+      where Clienti.idCliente =cliente
+    );
+    r_abbonamento c_abbs%Rowtype;
+begin
+    modGUI.apriPagina('HoC | scleta abbonamento utilizzato', id_Sessione, nome, ruolo);
+
+    select Clienti.idCliente
+      into v_idCliente
+      from sessioni, persone, clienti
+      where id_Sessione = sessioni.idSessione and
+            sessioni.idPersona = persone.idPersona and
+            persone.idPersona = clienti.idPersona;
+
+    open c_abbs (v_idCliente);
+    fetch c_abbs into r_abbonamento;
+    if c_abbs%NotFound then modGUI.esitoOperazione('ko','a quanto pare non possiedi alcun abbonamento');
+    else
+        modGui.ApriForm('abbonamento.Abbonamento_center');
+        modGui.inserisciinputHidden('id_Sessione', id_Sessione);
+        modGui.inserisciinputHidden('nome', nome);
+        modGui.inserisciinputHidden('ruolo', ruolo);
+        modGUI.apriSelect('abbonamento', 'scelta abbonamento');
+        loop
+            modGui.inserisciOpzioneSelect(r_abbonamento.idAbbonamento,'ABBONAMENTO '|| r_abbonamento.TipoAbbonamento|| ' IN SCADENZA '||r_abbonamento.DATAFINE);
+            fetch c_abbs into r_abbonamento;
+            exit when c_abbs%NotFound;
+        end loop;
+        modGui.chiudiSelect;
+        modGui.inserisciBottoneForm('scegli');
+        modGUI.chiudiForm;
+    end if;
+    /**/
+
+end ScegliAbbonamento;
 
 end abbonamento;

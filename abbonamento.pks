@@ -101,7 +101,11 @@ procedure Rimuovi_veicolo_abbonamento(
     idRiga varchar2
 );
 
-
+procedure ScegliAbbonamento(
+  id_Sessione Sessioni.idSessione%TYPE,
+  nome varchar2,
+  ruolo varchar2
+);
 
 
 end abbonamento;
