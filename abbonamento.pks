@@ -69,6 +69,13 @@ procedure checkDelegati(
   ruolo varchar2
 );
 
+procedure VeicoliCollegati(
+  id_Sessione Sessioni.idSessione%TYPE,
+  nome varchar2, 
+  ruolo varchar2,
+  idRiga Abbonamenti.idAbbonamento%TYPE
+);
+
 
 --valerio
 
