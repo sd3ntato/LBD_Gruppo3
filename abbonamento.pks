@@ -71,7 +71,7 @@ procedure checkDelegati(
 
 procedure VeicoliCollegati(
   id_Sessione Sessioni.idSessione%TYPE,
-  nome varchar2, 
+  nome varchar2,
   ruolo varchar2,
   idRiga Abbonamenti.idAbbonamento%TYPE
 );
@@ -86,9 +86,20 @@ procedure Pagamento_Inserimento_veicolo(
     idRiga varchar2
 );
 
-procedure Inserisci_veicolo_abbonamento(id_Sessione int, nome varchar2, ruolo varchar2, Abb Abbonamenti.idAbbonamento%type, Vei Veicoli.idVeicolo%type);
+procedure Inserisci_veicolo_abbonamento(
+    id_Sessione int,
+    nome varchar2,
+    ruolo varchar2,
+    Abb Abbonamenti.idAbbonamento%type,
+    Vei Veicoli.idVeicolo%type
+);
 
-procedure Rimuovi_veicolo_abbonamento(id_Sessione int, nome varchar2, ruolo varchar2, idRiga varchar2);
+procedure Rimuovi_veicolo_abbonamento(
+    id_Sessione int,
+    nome varchar2,
+    ruolo varchar2,
+    idRiga varchar2
+);
 
 
 
