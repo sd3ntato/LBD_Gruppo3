@@ -287,17 +287,22 @@ begin
         from AbbonamentiVeicoli
         where AbbonamentiVeicoli.idAbbonamento = abbonamento;
         modGUI.aCapo;
+        modGUI.apriDiv;
         modGUI.apriIntestazione(1);
             modGUI.inserisciTesto(' Lista Veicoli: ');
         modGUI.chiudiIntestazione(1);
         if c=v_maxveicoli
           then
             modGUI.apriIntestazione(3);
-            modGUI.inserisciTesto(' raggiunto limite massimo veicoli ');
+            modGUI.inserisciTesto(' raggiunto limite massimo veicoli, per inserire altri veicoli rimuovere prima almeno un veicolo gia presente ');
             modGui.chiudiIntestazione(3);
         end if;
-        modGUI.apriDiv;
+        modGUI.chiudiDiv;
         --veicoli proprietario
+        modGUI.apriDiv;
+        modGUI.apriIntestazione(2);
+            modGUI.inserisciTesto('veicoli del proprietario: ');
+        modGui.chiudiIntestazione(2);
           open c_veicoli_prop;
           fetch c_veicoli_prop into r_veicolo;
           if c_veicoli_prop%Found then
@@ -346,20 +351,22 @@ begin
               exit when c_veicoli_prop%NotFound;
               --c:=c+1;
               end loop;
+              modGui.chiudiTabella;
           else
              modGUI.apriIntestazione(3);
                  modGUI.inserisciTesto('Lista Veicoli proprietario vuota');
              modGUI.chiudiIntestazione(3);
           end if;
+          modgui.chiudidiv;
 
           -- veicoli utenti collegati
+          modGUI.apriDiv;
           modGUI.apriIntestazione(2);
             modGUI.inserisciTesto('veicoli utenti autorizzati: ');
           modGui.chiudiIntestazione(2);
           open c_veicoli_aut;
           fetch c_veicoli_aut into r_veicoli_aut;
           if c_veicoli_aut%Found then
-            modGUI.apriDiv;
             modgui.apritabella;
             modgui.intestazionetabella('produttore');
             modgui.intestazionetabella('modello');
@@ -409,19 +416,13 @@ begin
                 exit when c_veicoli_aut%notFound;
              end loop;
              modGui.chiudiTabella;
-             modGuI.chiudiDiv;
             else
              modGUI.apriIntestazione(3);
                  modGUI.inserisciTesto('Lista Veicoli utenti autorizzati vuota');
              modGUI.chiudiIntestazione(3);
             end if;
-
-
-
-
-
-    modGUI.chiuditabella;
-  modGUI.chiudiPagina;
+            modGUI.chiudiDiv;
+        modGUI.chiudiPagina;
 end Abbonamento_Center;
 
 procedure aggiungiUtenti(
