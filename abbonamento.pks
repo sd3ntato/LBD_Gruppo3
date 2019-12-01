@@ -108,5 +108,8 @@ procedure ScegliAbbonamento(
   ruolo varchar2
 );
 
+procedure Rimuovi_utente_autoriz( id_Sessione Sessioni.idSessione%TYPE, nome varchar2, ruolo varchar2,idRiga varchar2);
+
+
 
 end abbonamento;
