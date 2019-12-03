@@ -21,14 +21,14 @@ begin
       modGUI.inserisciTesto('Tipo Abbonamento: ');
       modGUI.aCapo;
       modGUI.apriSelect('Abbonamento', 'abbonamento');
-      for tipoabbonamenti in (select idTipoAbbonamento from tipiabbonamenti)
+      for tipoabbonamenti in (select idTipoAbbonamento, TipoAbbonamento from tipiabbonamenti)
       loop
-      modGUI.inserisciOpzioneSelect(tipoabbonamenti.idtipoabbonamento, tipoabbonamenti.idtipoabbonamento, false);
+      modGUI.inserisciOpzioneSelect(tipoabbonamenti.idtipoabbonamento, tipoabbonamenti.tipoabbonamento, false);
       end loop;
       modGUI.chiudiSelect;
       modGUI.aCapo;
       modGUI.inserisciTesto('Data Inizio: ');
-      modGUI.inserisciInput('data', 'date', 'Data', true);
+      modGUI.inserisciInput('data', 'date', 'Date', true);
       modGUI.aCapo;
 
       modGUI.inserisciBottoneReset('RESET');
@@ -143,8 +143,8 @@ procedure nuovoAbb(
 )
 is
 begin
-  INSERT INTO Abbonamenti (idAbbonamento, DataInizio, DataFine, CostoEffettivo, idCliente, idTipoAbbonamento)
-  VALUES (AbbonamentiSeq.nextval, datai, dataf, costoAbb, idClienteAbb ,abbonamento);
+  INSERT INTO Abbonamenti (idAbbonamento, DataInizio, DataFine, CostoEffettivo, idCliente, idTipoAbbonamento, PagamentiAbbonamenti)
+  VALUES (AbbonamentiSeq.nextval, datai, dataf, costoAbb, idClienteAbb ,abbonamento, costoAbb);
 
   modGUI.apriPagina('HoC | AbbonamentoCreato', id_Sessione, nome, ruolo);
     modGui.esitoOperazione('OK', 'Abbonamento Creato');
@@ -444,7 +444,7 @@ begin
         modGui.inserisciinputHidden('nome', nome);
         modGui.inserisciinputHidden('ruolo', ruolo);
         modGui.inserisciinputHidden('abbonamento', abbonamento);
-        modGUI.inserisciInput('Username utente', 'text', 'username', true, classe=>'myInputLogin');
+        modGUI.inserisciInput('Username', 'text', 'username', true, classe=>'myInputLogin');
         modGUI.aCapo;
         modGUI.inserisciBottoneForm('CONTINUA');
       modGUI.chiudiForm;
@@ -858,12 +858,7 @@ as
     pragma exception_init (max_veicoli_raggiunto,-2001);
 
 begin
-/*
-    SELECT (REGEXP_SUBSTR (idRiga, '(\S+)')) into str1  FROM dual ;
-    SELECT REGEXP_SUBSTR (idRiga, '(\S+)',1,2) into str2 FROM dual ;
-    Veicolo := to_number(str1);
-    Abbonamento := to_number(str2);
-*/
+
     modGUI.apriPagina('HoC | Esito manipolazione veicoli abbonamento', id_Sessione, nome, ruolo);
     select count(*) into v_count
         from AbbonamentiVeicoli
@@ -873,7 +868,9 @@ begin
         modgui.esitoOperazione('ko','veicolo gia presente');
     else
         insert into AbbonamentiVeicoli values ( Abb, Vei);
-        update abbonamenti set CostoEffettivo=CostoEffettivo+Costo where idAbbonamento=Abb;
+        update abbonamenti set CostoEffettivo=CostoEffettivo+Costo
+                        ,PagamentiAbbonamenti=PagamentiAbbonamenti+Costo
+        where idAbbonamento=Abb;
         --v_ok:='ok'
         modgui.esitoOperazione('ok','operazione effettuata');
     end if;
