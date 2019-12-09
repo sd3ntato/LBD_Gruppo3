@@ -8,36 +8,45 @@ procedure sottoscrizioneAbbonamento(
 )
 is
 begin
- modGUI.apriPagina('HoC | Sottoscrizione Abbonamento', id_Sessione, nome, ruolo);
+  if (ruolo = 'C') then
+    modGUI.apriPagina('HoC | Sottoscrizione Abbonamento', id_Sessione, nome, ruolo);
 
-	modGUI.aCapo;
-	modGUI.apriIntestazione(3);
-		modGUI.inserisciTesto('SOTTOSCRIZIONE ABBONAMENTO');
-	modGUI.chiudiIntestazione(3);
-  modGUI.apriDiv;
-  modGui.apriForm('gruppo3.checkAbbonamento');
-    modGui.inserisciinputHidden('id_Sessione', id_Sessione);
-    modGui.inserisciinputHidden('nome', nome);
-    modGui.inserisciinputHidden('ruolo', ruolo);
-      modGUI.inserisciTesto('Tipo Abbonamento: ');
-      modGUI.aCapo;
-      modGUI.apriSelect('Abbonamento', 'abbonamento');
-      for tipoabbonamenti in (select idTipoAbbonamento, TipoAbbonamento from tipiabbonamenti)
-      loop
-      modGUI.inserisciOpzioneSelect(tipoabbonamenti.idtipoabbonamento, tipoabbonamenti.tipoabbonamento, false);
-      end loop;
-      modGUI.chiudiSelect;
-      modGUI.aCapo;
-      modGUI.inserisciTesto('Data Inizio: ');
-      modGUI.inserisciInput('data', 'date', 'Date', true);
-      modGUI.aCapo;
+    modGUI.aCapo;
+    modGUI.apriIntestazione(3);
+      modGUI.inserisciTesto('SOTTOSCRIZIONE ABBONAMENTO');
+    modGUI.chiudiIntestazione(3);
+    modGUI.apriDiv;
+    modGui.apriForm('gruppo3.checkAbbonamento');
+      modGui.inserisciinputHidden('id_Sessione', id_Sessione);
+      modGui.inserisciinputHidden('nome', nome);
+      modGui.inserisciinputHidden('ruolo', ruolo);
+        modGUI.inserisciTesto('Tipo Abbonamento: ');
+        modGUI.aCapo;
+        modGUI.apriSelect('Abbonamento', 'abbonamento');
+        for tipoabbonamenti in (select idTipoAbbonamento, TipoAbbonamento from tipiabbonamenti)
+        loop
+        modGUI.inserisciOpzioneSelect(tipoabbonamenti.idtipoabbonamento, tipoabbonamenti.tipoabbonamento, false);
+        end loop;
+        modGUI.chiudiSelect;
+        modGUI.aCapo;
+        modGUI.inserisciTesto('Data Inizio: ');
+        modGUI.inserisciInput('data', 'date', 'Date', true);
+        modGUI.aCapo;
 
-      modGUI.inserisciBottoneReset('RESET');
-      modGUI.inserisciBottoneForm('CONTINUA');
-  modGui.chiudiForm;
---sdsd
-  modGUI.chiudiDiv;
- modGUI.chiudiPagina;
+        modGUI.inserisciBottoneReset('RESET');
+        modGUI.inserisciBottoneForm('CONTINUA');
+      modGui.chiudiForm;
+    --sdsd
+      modGUI.chiudiDiv;
+    modGUI.chiudiPagina;
+  else
+    modGUI.apriPagina('Errore', id_Sessione, nome, ruolo);
+      modGUI.esitoOperazione('KO', 'Non hai permessi per effettuare questa operazione');
+       modGUI.apriDiv(centrato=>true);
+         modGUI.inserisciBottone(id_Sessione, nome, ruolo, 'Indietro', 'modGUI.creaHome', 'defFormButton');
+       modGUI.chiudiDiv;
+    modGUI.chiudiPagina;
+  end if;
 
 end sottoscrizioneAbbonamento;
 
@@ -259,271 +268,280 @@ is
 
 
 begin
-  select Abbonamenti.idTipoAbbonamento, Abbonamenti.DataInizio, Abbonamenti.DataFine, Abbonamenti.CostoEffettivo, Clienti.CartaDiCredito, Abbonamenti.idCliente, tipiAbbonamenti.TipoAbbonamento
-    into v_TipoAbbonamento, datai, dataf, costoAbb, creditCard, idClienteAbb, TipoAbb
-    from Abbonamenti join TipiAbbonamenti on Abbonamenti.idTipoAbbonamento = tipiAbbonamenti.idTipoAbbonamento
-        join Clienti on Abbonamenti.idCliente = Clienti.idCliente
-   where idabbonamento = abb;
+  if (ruolo = 'C') then
+    select Abbonamenti.idTipoAbbonamento, Abbonamenti.DataInizio, Abbonamenti.DataFine, Abbonamenti.CostoEffettivo, Clienti.CartaDiCredito, Abbonamenti.idCliente, tipiAbbonamenti.TipoAbbonamento
+      into v_TipoAbbonamento, datai, dataf, costoAbb, creditCard, idClienteAbb, TipoAbb
+      from Abbonamenti join TipiAbbonamenti on Abbonamenti.idTipoAbbonamento = tipiAbbonamenti.idTipoAbbonamento
+          join Clienti on Abbonamenti.idCliente = Clienti.idCliente
+    where idabbonamento = abb;
 
-  select maxveicoli, maxclienti
-      into v_maxveicoli, v_maxclienti
-      from tipiabbonamenti
-      where v_TipoAbbonamento = idtipoabbonamento;
+    select maxveicoli, maxclienti
+        into v_maxveicoli, v_maxclienti
+        from tipiabbonamenti
+        where v_TipoAbbonamento = idtipoabbonamento;
 
-  modGUI.apriPagina('HoC | Pagamento', id_Sessione, nome, ruolo);
-    modGUI.aCapo;
-    modGUI.apriIntestazione(3);
-      modGUI.inserisciTesto('RIEPILOGO ABBONAMENTO');
-    modGUI.chiudiIntestazione(3);
-      modGui.apritabella;
-
-      modgui.apririgatabella;
-        modgui.intestazionetabella('Data Inizio');
-        modGUI.aprielementotabella;
-        modGUI.elementotabella(datai);
-        modGUI.chiudielementotabella;
-      modGui.chiudirigatabella;
-      modgui.apririgatabella;
-        modgui.intestazionetabella('Data Fine');
-        modGUI.aprielementotabella;
-        modGUI.elementotabella(dataf);
-        modGUI.chiudielementotabella;
-      modGui.chiudirigatabella;
-      modgui.apririgatabella;
-        modgui.intestazionetabella('Costo Abbonamento');
-        modGUI.aprielementotabella;
-        modGUI.elementotabella(costoAbb||' €');
-        modGUI.chiudielementotabella;
-      modGui.chiudirigatabella;
-      modgui.apririgatabella;
-        modgui.intestazionetabella('Carta di Credito utilizzata');
-        modGUI.aprielementotabella;
-        modGUI.elementotabella(creditCard);
-        modGUI.chiudielementotabella;
-      modGui.chiudirigatabella;
-      modgui.apririgatabella;
-        modgui.intestazionetabella('Tipo Abbonamento');
-        modGUI.aprielementotabella;
-        modGUI.elementotabella(TipoAbb);
-        modGUI.chiudielementotabella;
-      modGui.chiudirigatabella;
-      modgui.apririgatabella;
-        modgui.intestazionetabella('Assicurazione');
-        modGUI.aprielementotabella;
-        open c_ass (abb); fetch c_ass into v_ass;
-        if c_ass%Found then
-            modGUI.collegamento('Dettagli', 'gruppo3.VisualizzaAssicurazioneAbb?id_Sessione='||id_Sessione||'&nome='||nome||'&ruolo='||ruolo||'&Abb='||abb);
-        else
-            modGUI.collegamento('Richiedi Assicurazione', 'gruppo3.VisualizzaAssicurazioneAbb?id_Sessione='||id_Sessione||'&nome='||nome||'&ruolo='||ruolo||'&Abb='||abb);
-        end if;
-        modGUI.chiudielementotabella;
-      modGui.chiudirigatabella;
-      modGui.apriRigaTabella;
-        modgui.intestazionetabella('Cronologia degli accessi');
-        modGui.apriElementoTabella;
-        modGui.collegamento('Visualizza','gruppo3.procCronologiaAbbonamento?id_Sessione='||id_Sessione||'&nome='||nome||'&ruolo='||ruolo||'&Abb='||abb);
-        modGui.chiudiElementoTabella;
-      modGui.chiudiRigaTabella;
-    modGUI.chiuditabella;
-
-
-      modGUI.apriIntestazione(2);
-        modgui.inseriscitesto('Utenti usufruenti:');
-      modGUI.chiudiIntestazione(2);
-      v_count:=0;
-      open cursor_clienti;
-      fetch cursor_clienti into infoClienti;
-      if cursor_clienti%Found then
-        MODGUI.apriTabella;
-            MODGUI.apriRigaTabella;
-                MODGUI.intestazioneTabella('NOME');
-                MODGUI.intestazioneTabella('COGNOME');
-                MODGUI.intestazioneTabella('TELEFONO');
-                MODGUI.intestazioneTabella('PATENTE');
-                MODGUI.intestazioneTabella('ELIMINA');
-            MODGUI.chiudiRigaTabella;
-          loop
-             v_count:=v_count+1;
-             MODGUI.ApriRigaTabella;
-                MODGUI.ApriElementoTabella;
-                    MODGUI.ElementoTabella(infoClienti.nome);
-                MODGUI.ChiudiElementoTabella;
-                MODGUI.ApriElementoTabella;
-                    MODGUI.ElementoTabella(infoClienti.cognome);
-                MODGUI.ChiudiElementoTabella;
-                MODGUI.ApriElementoTabella;
-                    MODGUI.ElementoTabella(infoClienti.telefono);
-                MODGUI.ChiudiElementoTabella;
-                MODGUI.ApriElementoTabella;
-                    MODGUI.ElementoTabella(infoClienti.numeropatente);
-                MODGUI.ChiudiElementoTabella;
-                MODGUI.ApriElementoTabella;
-                    MODGUI.inserisciCestino('gruppo3.Rimuovi_utente_autoriz', id_Sessione, nome, ruolo, infoClienti.idcliente||' '||abb);
-                MODGUI.ChiudiElementoTabella;
-            MODGUI.ChiudiRigaTabella;
-            fetch cursor_clienti into infoClienti;
-            exit when cursor_clienti%NotFound;
-          end loop;
-        modGUI.chiudiTabella;
-        else
-          modGUI.apriIntestazione(2);
-            modgui.inseriscitesto('Nessun Utente collegato');
-          modGUI.chiudiIntestazione(2);
-        end if;
-    select tipiAbbonamenti.MaxClienti into c from abbonamenti join Tipiabbonamenti on abbonamenti.idTipoAbbonamento=tipiAbbonamenti.idTipoAbbonamento
-    where abbonamenti.idAbbonamento = abb;
-    if c>v_count then -- c: tipitabbonamenti.maxVeicoli v_count: utenti collegati
-        --se troppi utenti collegati non permetto inserimento
-        --procedure inserisciBottone(id_Sessione varchar2, nome varchar2, ruolo varchar2, testo , nomeProc , parametri , classe varchar2 );
-        modGUI.apriDiv(centrato=>true);
-            modGUI.inserisciBottone(id_sessione, nome, ruolo, 'Aggiungi Utenti' ,'gruppo3.aggiungiUtenti', '&abbonamento='||abb);
-        modGui.chiudiDiv;
-    else
+    modGUI.apriPagina('HoC | Pagamento', id_Sessione, nome, ruolo);
+      modGUI.aCapo;
       modGUI.apriIntestazione(3);
-        modgui.inseriscitesto('limite massimo utenti collegati raggiunto: per inserire altri utenti rimuoverne almeno uno dalla lista');
+        modGUI.inserisciTesto('RIEPILOGO ABBONAMENTO');
       modGUI.chiudiIntestazione(3);
-    end if;
-      c:=0;
-    modGUI.apriDiv;
-        modGUI.apriIntestazione(1);
-            modGUI.inserisciTesto(' Lista Veicoli: ');
-        modGUI.chiudiIntestazione(1);
-    modGUI.chiudiDiv;
-    select count(*) into c --controllo se e' possibile aggiungere veicoli
-    from AbbonamentiVeicoli
-    where AbbonamentiVeicoli.idAbbonamento = abb;
-    modGUI.aCapo;
-        --veicoli proprietario
-    modGUI.apriDiv;
+        modGui.apritabella;
+
+        modgui.apririgatabella;
+          modgui.intestazionetabella('Data Inizio');
+          modGUI.aprielementotabella;
+          modGUI.elementotabella(datai);
+          modGUI.chiudielementotabella;
+        modGui.chiudirigatabella;
+        modgui.apririgatabella;
+          modgui.intestazionetabella('Data Fine');
+          modGUI.aprielementotabella;
+          modGUI.elementotabella(dataf);
+          modGUI.chiudielementotabella;
+        modGui.chiudirigatabella;
+        modgui.apririgatabella;
+          modgui.intestazionetabella('Costo Abbonamento');
+          modGUI.aprielementotabella;
+          modGUI.elementotabella(costoAbb||' €');
+          modGUI.chiudielementotabella;
+        modGui.chiudirigatabella;
+        modgui.apririgatabella;
+          modgui.intestazionetabella('Carta di Credito utilizzata');
+          modGUI.aprielementotabella;
+          modGUI.elementotabella(creditCard);
+          modGUI.chiudielementotabella;
+        modGui.chiudirigatabella;
+        modgui.apririgatabella;
+          modgui.intestazionetabella('Tipo Abbonamento');
+          modGUI.aprielementotabella;
+          modGUI.elementotabella(TipoAbb);
+          modGUI.chiudielementotabella;
+        modGui.chiudirigatabella;
+        modgui.apririgatabella;
+          modgui.intestazionetabella('Assicurazione');
+          modGUI.aprielementotabella;
+          open c_ass (abb); fetch c_ass into v_ass;
+          if c_ass%Found then
+              modGUI.collegamento('Dettagli', 'gruppo3.VisualizzaAssicurazioneAbb?id_Sessione='||id_Sessione||'&nome='||nome||'&ruolo='||ruolo||'&Abb='||abb);
+          else
+              modGUI.collegamento('Richiedi Assicurazione', 'gruppo3.VisualizzaAssicurazioneAbb?id_Sessione='||id_Sessione||'&nome='||nome||'&ruolo='||ruolo||'&Abb='||abb);
+          end if;
+          modGUI.chiudielementotabella;
+        modGui.chiudirigatabella;
+        modGui.apriRigaTabella;
+          modgui.intestazionetabella('Cronologia degli accessi');
+          modGui.apriElementoTabella;
+          modGui.collegamento('Visualizza','gruppo3.procCronologiaAbbonamento?id_Sessione='||id_Sessione||'&nome='||nome||'&ruolo='||ruolo||'&Abb='||abb);
+          modGui.chiudiElementoTabella;
+        modGui.chiudiRigaTabella;
+      modGUI.chiuditabella;
+
+
         modGUI.apriIntestazione(2);
-            modGUI.inserisciTesto('veicoli del proprietario: ');
-        modGui.chiudiIntestazione(2);
-          open c_veicoli_prop;
-          fetch c_veicoli_prop into r_veicolo;
-          if c_veicoli_prop%Found then
-              modgui.apritabella;
-              modgui.intestazionetabella('Produttore');
-              modgui.intestazionetabella('Modello');
-              modgui.intestazionetabella('Targa');
-              if c< v_maxveicoli then
-                modgui.intestazionetabella('Inserisci');
-              end if;
-              modgui.intestazionetabella('Rimuovi');
-              loop
-                modgui.apririgatabella;
-                modGUI.apriElementoTabella;
-                    modgui.inseriscitesto(r_veicolo.produttore);
-                modgui.chiudielementotabella;
-                modGUI.apriElementoTabella;
-                    modgui.inseriscitesto(r_veicolo.modello);
-                modgui.chiudielementotabella;
-                modGUI.apriElementoTabella;
-                    modgui.inseriscitesto(r_veicolo.targa);
-                modgui.chiudielementotabella;
-                select count(*) into v_count from AbbonamentiVeicoli where idAbbonamento=abb and idVeicolo=r_veicolo.idVeicolo;
-                    if v_count = 0 then
-                        if c< v_maxveicoli then
-                          modGUI.apriElementoTabella;
-                          modGui.inserisciPenna('gruppo3.Pagamento_Inserimento_veicolo', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abb );
-                          modgui.chiudiElementotabella;
-                        end if;
-                        modGUI.apriElementoTabella;
-                        modgui.inserisciTesto('non presente');
-                        modgui.chiudiElementotabella;
-                    else
-                        if c< v_maxveicoli then
+          modgui.inseriscitesto('Utenti usufruenti:');
+        modGUI.chiudiIntestazione(2);
+        v_count:=0;
+        open cursor_clienti;
+        fetch cursor_clienti into infoClienti;
+        if cursor_clienti%Found then
+          MODGUI.apriTabella;
+              MODGUI.apriRigaTabella;
+                  MODGUI.intestazioneTabella('NOME');
+                  MODGUI.intestazioneTabella('COGNOME');
+                  MODGUI.intestazioneTabella('TELEFONO');
+                  MODGUI.intestazioneTabella('PATENTE');
+                  MODGUI.intestazioneTabella('ELIMINA');
+              MODGUI.chiudiRigaTabella;
+            loop
+              v_count:=v_count+1;
+              MODGUI.ApriRigaTabella;
+                  MODGUI.ApriElementoTabella;
+                      MODGUI.ElementoTabella(infoClienti.nome);
+                  MODGUI.ChiudiElementoTabella;
+                  MODGUI.ApriElementoTabella;
+                      MODGUI.ElementoTabella(infoClienti.cognome);
+                  MODGUI.ChiudiElementoTabella;
+                  MODGUI.ApriElementoTabella;
+                      MODGUI.ElementoTabella(infoClienti.telefono);
+                  MODGUI.ChiudiElementoTabella;
+                  MODGUI.ApriElementoTabella;
+                      MODGUI.ElementoTabella(infoClienti.numeropatente);
+                  MODGUI.ChiudiElementoTabella;
+                  MODGUI.ApriElementoTabella;
+                      MODGUI.inserisciCestino('gruppo3.Rimuovi_utente_autoriz', id_Sessione, nome, ruolo, infoClienti.idcliente||' '||abb);
+                  MODGUI.ChiudiElementoTabella;
+              MODGUI.ChiudiRigaTabella;
+              fetch cursor_clienti into infoClienti;
+              exit when cursor_clienti%NotFound;
+            end loop;
+          modGUI.chiudiTabella;
+          else
+            modGUI.apriIntestazione(2);
+              modgui.inseriscitesto('Nessun Utente collegato');
+            modGUI.chiudiIntestazione(2);
+          end if;
+      select tipiAbbonamenti.MaxClienti into c from abbonamenti join Tipiabbonamenti on abbonamenti.idTipoAbbonamento=tipiAbbonamenti.idTipoAbbonamento
+      where abbonamenti.idAbbonamento = abb;
+      if c>v_count then -- c: tipitabbonamenti.maxVeicoli v_count: utenti collegati
+          --se troppi utenti collegati non permetto inserimento
+          --procedure inserisciBottone(id_Sessione varchar2, nome varchar2, ruolo varchar2, testo , nomeProc , parametri , classe varchar2 );
+          modGUI.apriDiv(centrato=>true);
+              modGUI.inserisciBottone(id_sessione, nome, ruolo, 'Aggiungi Utenti' ,'gruppo3.aggiungiUtenti', '&abbonamento='||abb);
+          modGui.chiudiDiv;
+      else
+        modGUI.apriIntestazione(3);
+          modgui.inseriscitesto('limite massimo utenti collegati raggiunto: per inserire altri utenti rimuoverne almeno uno dalla lista');
+        modGUI.chiudiIntestazione(3);
+      end if;
+        c:=0;
+      modGUI.apriDiv;
+          modGUI.apriIntestazione(1);
+              modGUI.inserisciTesto(' Lista Veicoli: ');
+          modGUI.chiudiIntestazione(1);
+      modGUI.chiudiDiv;
+      select count(*) into c --controllo se e' possibile aggiungere veicoli
+      from AbbonamentiVeicoli
+      where AbbonamentiVeicoli.idAbbonamento = abb;
+      modGUI.aCapo;
+          --veicoli proprietario
+      modGUI.apriDiv;
+          modGUI.apriIntestazione(2);
+              modGUI.inserisciTesto('veicoli del proprietario: ');
+          modGui.chiudiIntestazione(2);
+            open c_veicoli_prop;
+            fetch c_veicoli_prop into r_veicolo;
+            if c_veicoli_prop%Found then
+                modgui.apritabella;
+                modgui.intestazionetabella('Produttore');
+                modgui.intestazionetabella('Modello');
+                modgui.intestazionetabella('Targa');
+                if c< v_maxveicoli then
+                  modgui.intestazionetabella('Inserisci');
+                end if;
+                modgui.intestazionetabella('Rimuovi');
+                loop
+                  modgui.apririgatabella;
+                  modGUI.apriElementoTabella;
+                      modgui.inseriscitesto(r_veicolo.produttore);
+                  modgui.chiudielementotabella;
+                  modGUI.apriElementoTabella;
+                      modgui.inseriscitesto(r_veicolo.modello);
+                  modgui.chiudielementotabella;
+                  modGUI.apriElementoTabella;
+                      modgui.inseriscitesto(r_veicolo.targa);
+                  modgui.chiudielementotabella;
+                  select count(*) into v_count from AbbonamentiVeicoli where idAbbonamento=abb and idVeicolo=r_veicolo.idVeicolo;
+                      if v_count = 0 then
+                          if c< v_maxveicoli then
                             modGUI.apriElementoTabella;
-                            modGui.InserisciTesto('presente');
+                            modGui.inserisciPenna('gruppo3.Autorim_ins_veicolo', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abb );
                             modgui.chiudiElementotabella;
-                        end if;
-                        modGUI.apriElementoTabella;
-                        modGui.inserisciCestino('gruppo3.Rimuovi_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abb);
-                        modgui.chiudiElementotabella;
-                    end if;
-                modgui.chiudielementotabella;
-                modgui.chiudirigatabella;
-              fetch c_veicoli_prop into r_veicolo;
-              exit when c_veicoli_prop%NotFound;
-              --c:=c+1;
+                          end if;
+                          modGUI.apriElementoTabella;
+                          modgui.inserisciTesto('non presente');
+                          modgui.chiudiElementotabella;
+                      else
+                          if c< v_maxveicoli then
+                              modGUI.apriElementoTabella;
+                              modGui.InserisciTesto('presente');
+                              modgui.chiudiElementotabella;
+                          end if;
+                          modGUI.apriElementoTabella;
+                          modGui.inserisciCestino('gruppo3.Rimuovi_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abb);
+                          modgui.chiudiElementotabella;
+                      end if;
+                  modgui.chiudielementotabella;
+                  modgui.chiudirigatabella;
+                fetch c_veicoli_prop into r_veicolo;
+                exit when c_veicoli_prop%NotFound;
+                --c:=c+1;
+                end loop;
+                modGui.chiudiTabella;
+            else
+              modGUI.apriIntestazione(3);
+                  modGUI.inserisciTesto('Lista Veicoli proprietario vuota');
+              modGUI.chiudiIntestazione(3);
+            end if;
+            modgui.chiudidiv;
+
+            -- veicoli utenti collegati
+            modGUI.apriDiv;
+            modGUI.apriIntestazione(2);
+              modGUI.inserisciTesto('veicoli utenti autorizzati: ');
+            modGui.chiudiIntestazione(2);
+            open c_veicoli_aut;
+            fetch c_veicoli_aut into r_veicoli_aut;
+            if c_veicoli_aut%Found then
+              modgui.apritabella;
+              modgui.intestazionetabella('produttore');
+              modgui.intestazionetabella('modello');
+              modgui.intestazionetabella('targa');
+              modgui.intestazionetabella('proprietario');
+              if c< v_maxveicoli then
+                  modgui.intestazionetabella('inserisci');
+              end if;
+              modgui.intestazionetabella('rimuovi');
+              loop
+                  modgui.apririgatabella;
+                  modGUI.apriElementoTabella;
+                      modgui.inseriscitesto(r_veicoli_aut.produttore);
+                  modgui.chiudielementotabella;
+                  modGUI.apriElementoTabella;
+                      modgui.inseriscitesto(r_veicoli_aut.modello);
+                  modgui.chiudielementotabella;
+                  modGUI.apriElementoTabella;
+                      modgui.inseriscitesto(r_veicoli_aut.targa);
+                  modgui.chiudielementotabella;
+                  modGUI.apriElementoTabella;
+                      modgui.inseriscitesto(r_veicoli_aut.nomev||' '||r_veicoli_aut.cognomev);
+                  modgui.chiudielementotabella;
+                  select count(*) into v_count from AbbonamentiVeicoli where idAbbonamento=abb and idVeicolo=r_veicoli_aut.idVeicolo;
+                      if v_count = 0 then
+                          if c< v_maxveicoli then
+                              modGUI.apriElementoTabella;
+                              modGui.inserisciPenna('gruppo3.Autorim_ins_veicolo', id_Sessione, nome, ruolo, r_veicoli_aut.idVeicolo||' '||abb );
+                              modgui.chiudiElementotabella;
+                          end if;
+                          modGUI.apriElementoTabella;
+                          modgui.inserisciTesto('non presente');
+                          modgui.chiudiElementotabella;
+                      else
+                          if c< v_maxveicoli then
+                              modGUI.apriElementoTabella;
+                              modGui.InserisciTesto('presente');
+                              modgui.chiudiElementotabella;
+                          end if;
+                          modGUI.apriElementoTabella;
+                          modGui.inserisciPenna('gruppo3.Rimuovi_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicoli_aut.idVeicolo||' '||abb);
+                          modgui.chiudiElementotabella;
+                      end if;
+                  modgui.chiudielementotabella;
+                  modgui.chiudirigatabella;
+                  fetch c_veicoli_aut into r_veicoli_aut;
+                  exit when c_veicoli_aut%notFound;
               end loop;
               modGui.chiudiTabella;
-          else
-             modGUI.apriIntestazione(3);
-                 modGUI.inserisciTesto('Lista Veicoli proprietario vuota');
-             modGUI.chiudiIntestazione(3);
-          end if;
-          modgui.chiudidiv;
-
-          -- veicoli utenti collegati
-          modGUI.apriDiv;
-          modGUI.apriIntestazione(2);
-            modGUI.inserisciTesto('veicoli utenti autorizzati: ');
-          modGui.chiudiIntestazione(2);
-          open c_veicoli_aut;
-          fetch c_veicoli_aut into r_veicoli_aut;
-          if c_veicoli_aut%Found then
-            modgui.apritabella;
-            modgui.intestazionetabella('produttore');
-            modgui.intestazionetabella('modello');
-            modgui.intestazionetabella('targa');
-            modgui.intestazionetabella('proprietario');
-            if c< v_maxveicoli then
-                modgui.intestazionetabella('inserisci');
-            end if;
-            modgui.intestazionetabella('rimuovi');
-            loop
-                modgui.apririgatabella;
-                modGUI.apriElementoTabella;
-                    modgui.inseriscitesto(r_veicoli_aut.produttore);
-                modgui.chiudielementotabella;
-                modGUI.apriElementoTabella;
-                    modgui.inseriscitesto(r_veicoli_aut.modello);
-                modgui.chiudielementotabella;
-                modGUI.apriElementoTabella;
-                    modgui.inseriscitesto(r_veicoli_aut.targa);
-                modgui.chiudielementotabella;
-                modGUI.apriElementoTabella;
-                    modgui.inseriscitesto(r_veicoli_aut.nomev||' '||r_veicoli_aut.cognomev);
-                modgui.chiudielementotabella;
-                select count(*) into v_count from AbbonamentiVeicoli where idAbbonamento=abb and idVeicolo=r_veicoli_aut.idVeicolo;
-                    if v_count = 0 then
-                        if c< v_maxveicoli then
-                            modGUI.apriElementoTabella;
-                            modGui.inserisciPenna('gruppo3.Pagamento_Inserimento_veicolo', id_Sessione, nome, ruolo, r_veicoli_aut.idVeicolo||' '||abb );
-                            modgui.chiudiElementotabella;
-                        end if;
-                        modGUI.apriElementoTabella;
-                        modgui.inserisciTesto('non presente');
-                        modgui.chiudiElementotabella;
-                    else
-                        if c< v_maxveicoli then
-                            modGUI.apriElementoTabella;
-                            modGui.InserisciTesto('presente');
-                            modgui.chiudiElementotabella;
-                        end if;
-                        modGUI.apriElementoTabella;
-                        modGui.inserisciPenna('gruppo3.Rimuovi_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicoli_aut.idVeicolo||' '||abb);
-                        modgui.chiudiElementotabella;
-                    end if;
-                modgui.chiudielementotabella;
-                modgui.chiudirigatabella;
-                fetch c_veicoli_aut into r_veicoli_aut;
-                exit when c_veicoli_aut%notFound;
-             end loop;
-             modGui.chiudiTabella;
-            else
-             modGUI.apriIntestazione(3);
-                 modGUI.inserisciTesto('Lista Veicoli utenti autorizzati vuota');
-             modGUI.chiudiIntestazione(3);
-            end if;
-            if c=v_maxveicoli
-              then
-                modGUI.apriIntestazione(3);
-                modGUI.inserisciTesto(' raggiunto limite massimo veicoli, per inserire altri veicoli rimuovere prima almeno un veicolo gia presente ');
-                modGui.chiudiIntestazione(3);
-            end if;
-            modGUI.chiudiDiv;
-        modGUI.chiudiPagina;
+              else
+              modGUI.apriIntestazione(3);
+                  modGUI.inserisciTesto('Lista Veicoli utenti autorizzati vuota');
+              modGUI.chiudiIntestazione(3);
+              end if;
+              if c=v_maxveicoli
+                then
+                  modGUI.apriIntestazione(3);
+                  modGUI.inserisciTesto(' raggiunto limite massimo veicoli, per inserire altri veicoli rimuovere prima almeno un veicolo gia presente ');
+                  modGui.chiudiIntestazione(3);
+              end if;
+              modGUI.chiudiDiv;
+          modGUI.chiudiPagina;
+  else
+    modGUI.apriPagina('Errore', id_Sessione, nome, ruolo);
+      modGUI.esitoOperazione('KO', 'Non hai permessi per effettuare questa operazione');
+        modGUI.apriDiv(centrato=>true);
+          modGUI.inserisciBottone(id_Sessione, nome, ruolo, 'Indietro', 'modGui.creaHome', 'defFormButton');
+        modGUI.chiudiDiv;
+    modGUI.chiudiPagina;
+  end if;
 end Abbonamento_Center;
 
 
@@ -850,7 +868,7 @@ begin
                   modgui.inseriscitesto(scadenza || ' giorni');
                 modgui.chiudielementotabella;
                 modGUI.apriElementoTabella;
-                    modgui.inserisciLente('gruppo3.VeicoliCollegati', id_Sessione, nome, ruolo, r_abb.idAbbonamento);
+                    modGUI.Collegamento('Viualizza Veicoli',  'gruppo3.Lista_Veicoli_Abbonamento?id_Sessione=' || id_Sessione || '&nome=' || nome || '&ruolo=' || ruolo || '&abb=' || r_abb.idAbbonamento);
                 modgui.chiudielementotabella;
               modgui.chiudirigatabella;
             end if;
@@ -928,16 +946,57 @@ end VeicoliCollegati;
 
 
 
-
-
-
-
-
-procedure Pagamento_Inserimento_veicolo(id_Sessione int, nome varchar2, ruolo varchar2, idRiga varchar2)
-as
+procedure Autorim_ins_veicolo(id_Sessione int, nome varchar2, ruolo varchar2, idRiga varchar2)
+is
     Veicolo number(38,0);
     Abbonamento number(38,0);
     str1 varchar2(200); str2 varchar2(200);
+    cursor c_autorimesse (Vei veicoli.idVeicolo%type ) is
+        select Autorimesse.idAutorimessa, Autorimesse.indirizzo
+            from Autorimesse
+            where gruppo3.Ass_area_min(Vei) is not null ;
+    r_autorimessa c_autorimesse%RowType;
+begin
+    SELECT (REGEXP_SUBSTR (idRiga, '(\S+)')) into str1  FROM dual ;
+    SELECT REGEXP_SUBSTR (idRiga, '(\S+)',1,2) into str2 FROM dual ;
+    Veicolo := to_number(str1);
+    Abbonamento := to_number(str2);
+    modGUI.apriPagina('HoC | Pagamento', id_Sessione, nome, ruolo);
+
+    open c_autorimesse(Veicolo);
+    fetch c_autorimesse into r_autorimessa;
+    if c_autorimesse%Found then
+        modGUI.apriForm(azione=>'gruppo3.Pagamento_Inserimento_veicolo');
+        modGUI.ApriIntestazione(3);
+            modGUI.inserisciTesto('selezionare autorimessa:');
+        modGUI.ChiudiIntestazione(3);
+        modGUI.inserisciInputHidden('id_Sessione',id_Sessione);
+        modGUI.inserisciInputHidden('nome',nome);
+        modGUI.inserisciInputHidden('ruolo',ruolo);
+        modGUI.inserisciInputHidden('Abb',Abbonamento);
+        modGUI.inserisciInputHidden('Vei',Veicolo);
+        modGUI.apriSelect('Autorimessa','Autorimessa');
+        loop
+            modGui.inserisciOpzioneSelect(r_autorimessa.idAutorimessa,r_autorimessa.indirizzo);
+            fetch c_autorimesse into r_autorimessa;
+            exit when c_autorimesse%NotFound;
+        end loop;
+        modGUI.chiudiSelect;
+        modGUI.inserisciBottoneForm;
+    else
+        modGUI.ApriIntestazione(3);
+            modGUI.inserisciTesto('Spiacenti, il tuo veicolo non puo usare House of Cars: e troppo grande');
+        modGUI.ChiudiIntestazione(3);
+    end if;
+
+end Autorim_ins_veicolo;
+
+
+
+
+
+procedure Pagamento_Inserimento_veicolo(id_Sessione int, nome varchar2, ruolo varchar2, Abb abbonamenti.idAbbonamento%type, Vei veicoli.idVeicolo%type, Autorimessa varchar2)
+as
     v_count integer;
     v_max TipiAbbonamenti.MaxVeicoli%type;
     v_area Aree.idArea%type;
@@ -946,14 +1005,17 @@ as
     pragma exception_init (max_veicoli_raggiunto,-2001);
     Area_non_trovata exception;
 
+
 begin
-    SELECT (REGEXP_SUBSTR (idRiga, '(\S+)')) into str1  FROM dual ;
-    SELECT REGEXP_SUBSTR (idRiga, '(\S+)',1,2) into str2 FROM dual ;
-    Veicolo := to_number(str1);
-    Abbonamento := to_number(str2);
-    v_area:= gruppo3.Ass_area_min(Veicolo);
-    if v_area = null then raise Area_non_trovata; end if;
+    v_area:= gruppo3.Ass_area_min(Vei,Autorimessa);
+    if v_area is null then raise Area_non_trovata; end if;
+
     modGUI.apriPagina('HoC | Pagamento', id_Sessione, nome, ruolo);
+
+
+    modGui.apriIntestazione(2);
+    modGUI.inserisciTesto( 'area:'|| v_area);
+    modGUI.chiudiIntestazione(2);
 
 
     select Aree.CostoAbbonamento into v_costo
@@ -962,7 +1024,7 @@ begin
 
     select count(*) into v_count
         from AbbonamentiVeicoli
-        where idAbbonamento= Abbonamento and idVeicolo= Veicolo;
+        where idAbbonamento= Abb and idVeicolo= Vei;
     if v_count != 0 then
         modgui.esitoOperazione('ko','veicolo gia presente');
 
@@ -972,12 +1034,12 @@ begin
         select tipiAbbonamenti.MaxVeicoli
             into v_max
             from TipiAbbonamenti join Abbonamenti on Abbonamenti.idTipoAbbonamento = TipiAbbonamenti.idTipoAbbonamento
-            where abbonamenti.idAbbonamento = Abbonamento;
+            where abbonamenti.idAbbonamento = Abb;
 
         select count(*)
             into v_count
             from AbbonamentiVeicoli
-        where AbbonamentiVeicoli.idAbbonamento = Abbonamento;
+        where AbbonamentiVeicoli.idAbbonamento = Abb;
 
         if v_count<= v_max then
             modgui.apriform(azione=>'gruppo3.Inserisci_Veicolo_abbonamento');
@@ -987,9 +1049,9 @@ begin
             modGUI.inserisciInputHidden('id_Sessione',id_Sessione);
             modGUI.inserisciInputHidden('nome',nome);
             modGUI.inserisciInputHidden('ruolo',ruolo);
-            modGUI.inserisciInputHidden('Abb',Abbonamento);
-            modGUI.inserisciInputHidden('Vei',Veicolo);
-            modGUI.inserisciInputHidden('Costo',v_costo);
+            modGUI.inserisciInputHidden('Abb',Abb);
+            modGUI.inserisciInputHidden('Vei',Vei);
+            modGUI.inserisciInputHidden('Area',v_area);
             modgui.inseriscibottoneform(testo=>'paga');
             modgui.chiudiform;
         else
@@ -998,15 +1060,17 @@ begin
 
 
     end if;
-    /**/
+
     modGui.aCapo;
-            modgui.apriform(azione=>'gruppo3.Abbonamento_Center');
+        modgui.apriform(azione=>'gruppo3.Abbonamento_Center');
             modGUI.inserisciInputHidden('id_Sessione',id_Sessione);
             modGUI.inserisciInputHidden('nome',nome);
             modGUI.inserisciInputHidden('ruolo',ruolo);
-            modGUI.inserisciInputHidden('abbonamento',Abbonamento);
+            modGUI.inserisciInputHidden('abbonamento',Abb);
             modgui.inseriscibottoneform(testo=>'indietro');
-            modgui.chiudiform;
+         modgui.chiudiform;
+
+
     exception
         when Area_non_trovata then modGUI.esitoOperazione('KO','il tuo veicolo non puo essere contenuto in nessuna area');
         when max_veicoli_raggiunto then modGUI.esitoOperazione('KO','troppi veicoli');
@@ -1019,23 +1083,33 @@ end;
 
 
 
-procedure Inserisci_veicolo_abbonamento(id_Sessione int, nome varchar2, ruolo varchar2, Abb Abbonamenti.idAbbonamento%type, Vei Veicoli.idVeicolo%type, Costo abbonamenti.CostoEffettivo%type)
+procedure Inserisci_veicolo_abbonamento(id_Sessione int, nome varchar2, ruolo varchar2, Abb Abbonamenti.idAbbonamento%type, Vei Veicoli.idVeicolo%type, Area aree.idArea%type)
 as
-    str1 varchar2(200); str2 varchar2(200);
     v_count integer;
     v_ok varchar(20);
+    Costo abbonamenti.costoEffettivo%type;
     max_veicoli_raggiunto exception;
     pragma exception_init (max_veicoli_raggiunto,-2001);
+    cursor c_box is select idbox from box where box.idArea = Area and box.riservato = 'F';
+    v_box box.idBox%type;
+
+    no_box_exception exception;
 
 begin
-
     modGUI.apriPagina('HoC | Esito manipolazione veicoli abbonamento', id_Sessione, nome, ruolo);
+    Select aree.CostoAbbonamento into Costo
+    from aree where aree.idArea=Area;
+
+    open c_box;
+    fetch c_box into v_box;
+    if c_box%NotFound then raise no_box_exception; end if;
+    close c_box;
+
     select count(*) into v_count
         from AbbonamentiVeicoli
         where idAbbonamento= Abb and idVeicolo= Vei;
 
     if v_count != 0 then
-        --v_ok:='nok';
         modgui.esitoOperazione('KO','veicolo gia presente');
     else
 
@@ -1045,19 +1119,21 @@ begin
                         ,PagamentiAbbonamenti=PagamentiAbbonamenti+Costo
         where idAbbonamento=Abb;
 
-        --v_ok:='ok'
+        update box set riservato= 'T' , idAbbonamento = Abb
+        where idbox= v_box;
+
         modgui.esitoOperazione('ok','operazione effettuata');
     end if;
 
     modGUI.apriDiv(centrato=>true);
         modgui.inseriscibottone(id_Sessione,nome,ruolo,'home','modgui.creaHome','defFormButton');
     modGUI.chiudiDiv;
-        modgui.apriform(azione=>'gruppo3.Abbonamento_Center');
-    modGUI.inserisciInputHidden('id_Sessione',id_Sessione);
-    modGUI.inserisciInputHidden('nome',nome);
-    modGUI.inserisciInputHidden('ruolo',ruolo);
-    modGUI.inserisciInputHidden('abb',Abb);
-    modgui.inseriscibottoneform(testo=>'riepilogo abbonamento');
+    modgui.apriform(azione=>'gruppo3.Abbonamento_Center');
+        modGUI.inserisciInputHidden('id_Sessione',id_Sessione);
+        modGUI.inserisciInputHidden('nome',nome);
+        modGUI.inserisciInputHidden('ruolo',ruolo);
+        modGUI.inserisciInputHidden('abb',Abb);
+        modgui.inseriscibottoneform(testo=>'riepilogo abbonamento');
     modgui.chiudiform;
 
 
@@ -1066,10 +1142,15 @@ begin
 exception
     when max_veicoli_raggiunto then modgui.esitoOperazione('KO','troppi veicoli');
     modgui.inseriscibottone(id_Sessione,nome,ruolo,'home','modgui.creaHome','defFormButton');
-    modgui.inseriscibottone(id_Sessione,nome,ruolo,'ancora','gruppo3.Abbonamento_Center','defFormButton');
+    modgui.inseriscibottone(id_Sessione,nome,ruolo,'ancora','gruppo3.Abbonamento_Center','defFormButton','&abb='||Abb);
     when no_data_found then modgui.esitoOperazione('KO','no data found');
     modgui.inseriscibottone(id_Sessione,nome,ruolo,'home','modgui.creaHome','defFormButton');
     modgui.inseriscibottone(id_Sessione,nome,ruolo,'ancora','gruppo3.Abbonamento_Center','defFormButton','&abb='||Abb);
+    when no_box_exception then modgui.esitoOperazione('KO','no box available');
+    modGui.apriDiv(true);
+    modgui.inseriscibottone(id_Sessione,nome,ruolo,'home','modgui.creaHome','defFormButton');
+    modgui.inseriscibottone(id_Sessione,nome,ruolo,'ancora','gruppo3.Abbonamento_Center','&abb='||Abb,'defFormButton');
+    modGui.chiudiDiv;
 end;
 
 
@@ -1094,6 +1175,7 @@ begin
     SELECT REGEXP_SUBSTR (idRiga, '(\S+)',1,2) into str2 FROM dual ;
     Veicolo := to_number(str1);
     Abbonamento := to_number(str2);
+    --qui bisogna farlo autorimemssa aware
     select Aree.costoAbbonamento into v_costo from Aree where idArea= (gruppo3.Ass_area_min(veicolo));
     modGUI.apriPagina('HoC | Esito manipolazione veicoli abbonamento', id_Sessione, nome, ruolo);
     open cVei(Abbonamento,Veicolo) ;
@@ -1134,10 +1216,11 @@ is
       join TipiAbbonamenti on abbonamenti.idTipoAbbonamento= tipiAbbonamenti.idTipoAbbonamento
       where Clienti.idCliente =cliente
     );
+    v_abbs_count int :=0;
     r_abbonamento c_abbs%Rowtype;
 begin
     modGUI.apriPagina('HoC | scleta abbonamento utilizzato', id_Sessione, nome, ruolo);
-
+    modGUI.aCapo;
     select Clienti.idCliente
       into v_idCliente
       from sessioni, persone, clienti
@@ -1149,16 +1232,22 @@ begin
     fetch c_abbs into r_abbonamento;
     if c_abbs%NotFound then modGUI.esitoOperazione('ko','a quanto pare non possiedi alcun abbonamento');
     else
-        modGui.ApriForm('gruppo3.'||nomeProc);
+        if nomeProc = 'provaPark' then
+            modGui.ApriForm(nomeProc);
+        else
+            modGui.ApriForm('gruppo3.'||nomeProc);
+        end if;
         modGui.inserisciinputHidden('id_Sessione', id_Sessione);
         modGui.inserisciinputHidden('nome', nome);
         modGui.inserisciinputHidden('ruolo', ruolo);
         modGUI.apriSelect('Abb', 'scelta abbonamento');
         loop
+            v_abbs_count := v_abbs_count + 1;
             modGui.inserisciOpzioneSelect(r_abbonamento.idAbbonamento,'ABBONAMENTO '|| r_abbonamento.TipoAbbonamento|| ' IN SCADENZA '||r_abbonamento.DATAFINE);
             fetch c_abbs into r_abbonamento;
             exit when c_abbs%NotFound;
         end loop;
+
         modGui.chiudiSelect;
         modGui.inserisciBottoneForm('scegli');
         modGUI.chiudiForm;
@@ -1712,12 +1801,12 @@ procedure procCronologia(id_Sessione varchar2, nome varchar2, ruolo varchar2) is
       modGUI.chiudiPagina;
     end if;
     else
-    modGUI.apriPagina('Errore', id_Sessione, nome, ruolo);
-      modGUI.esitoOperazione('KO', 'Non hai permessi per effettuare questa operazione');
-       modGUI.apriDiv(centrato=>true);
-         modGUI.inserisciBottone(id_Sessione, nome, ruolo, 'Indietro', 'gruppo3.homeRinnovo', 'defFormButton');
-       modGUI.chiudiDiv;
-    modGUI.chiudiPagina;
+      modGUI.apriPagina('Errore', id_Sessione, nome, ruolo);
+        modGUI.esitoOperazione('KO', 'Non hai permessi per effettuare questa operazione');
+        modGUI.apriDiv(centrato=>true);
+          modGUI.inserisciBottone(id_Sessione, nome, ruolo, 'Indietro', 'gruppo3.homeRinnovo', 'defFormButton');
+        modGUI.chiudiDiv;
+      modGUI.chiudiPagina;
     end if;
 
     exception
@@ -1742,6 +1831,8 @@ procedure procCronologia(id_Sessione varchar2, nome varchar2, ruolo varchar2) is
       SET abbonamenti.datafine = abbonamenti.datafine + var_durata
       WHERE abbonamenti.idabbonamento = idRiga;
 
+      update box set riservato = 'F', idAbbonamento = null where box.idAbbonamento = idRiga;
+
       modGUI.esitoOperazione('OK', 'Rinnovo avvenuto correttamente');
       modGUI.apriDiv(centrato=>true);
         modGUI.inserisciBottone(id_Sessione, nome, ruolo, 'Indietro', 'gruppo3.ScegliAbbonamento', 'defFormButton');
@@ -1756,7 +1847,8 @@ procedure procCronologia(id_Sessione varchar2, nome varchar2, ruolo varchar2) is
   procedure Parcheggio_Abb(
       IdAbb abbonamenti.idAbbonamento%type,
       IdVei veicoli.idVeicolo%type,
-      IdCli clienti.idcliente%type
+      IdCli clienti.idcliente%type,
+      IdAut autorimesse.idAutorimessa%type
   )
   is
     v_area aree.idArea%type;
@@ -1764,7 +1856,7 @@ procedure procCronologia(id_Sessione varchar2, nome varchar2, ruolo varchar2) is
     RightBoxNotFound exception;
 
   begin
-    v_area:=gruppo3.Ass_area_min(IdVei);
+    v_area:=gruppo3.Ass_area_min(IdVei,idAut);
   -- trova box riservato per questo veicolo e questo abbonamento
   -- ogni veicolo nella lista veicoli di un abbonamento ha un posto riservato nell'area piu adatta a contenerlo
   --non si puo fare la ricerca solo per box.idAbbonamento perche rischio di occupare il posto che era
@@ -1786,9 +1878,12 @@ procedure procCronologia(id_Sessione varchar2, nome varchar2, ruolo varchar2) is
   procedure ritiro_abbonati(Vei veicoli.idVeicolo%type) as
     IngressoInesistenteOConcluso exception;
   begin
-    update IngressiAbbonamenti set OraUscita = SYSTIMESTAMP where idIngressoAbbonamento = (select IngressiAbbonamenti.idIngressoAbbonamento
+    update IngressiAbbonamenti set OraUscita = SYSTIMESTAMP where idIngressoAbbonamento =
+    (select IngressiAbbonamenti.idIngressoAbbonamento
       from IngressiAbbonamenti join EffettuaIngressiAbbonamenti on EffettuaIngressiAbbonamenti.idIngressoAbbonamento= IngressiAbbonamenti.idIngressoAbbonamento
-      where EffettuaIngressiAbbonamenti.idVeicolo =vei and OraUscita=null);
+      where EffettuaIngressiAbbonamenti.idVeicolo =vei and OraUscita is null
+    );
+
     if SQL%NotFound then raise IngressoInesistenteOConcluso; end if;
   end;
 
@@ -1797,7 +1892,8 @@ procedure procCronologia(id_Sessione varchar2, nome varchar2, ruolo varchar2) is
 
 
   function Ass_area_min(
-      Vei veicoli.idVeicolo%type
+      Vei veicoli.idVeicolo%type,
+      Autorimessa varchar2 default 'null'
   )
   return aree.idArea%type as
   --caratteristiche del veicolo a cui devo assegnare area
@@ -1815,9 +1911,22 @@ procedure procCronologia(id_Sessione varchar2, nome varchar2, ruolo varchar2) is
                   AltezzaMax > act_altez and
                   PesoMax > act_peso and
                   not ( ( Gas = 'T' ) ) or act_alim = 'GPL' ;
+      num_autorimessa number(38,0);
+      cursor c_aree_aut (aut number) is
+        select idArea, LunghezzaMax, LarghezzaMax, AltezzaMax, PesoMax
+              from aree
+                  where LunghezzaMax > act_lungh and
+                  LarghezzaMax > act_largh and
+                  AltezzaMax > act_altez and
+                  PesoMax > act_peso and
+                 ( not ( ( Gas = 'T' ) ) or act_alim = 'GPL' ) and
+                  idAutorimessa = aut;
+
       r_area c_aree%RowType;
+      r_area_aut c_aree_aut%RowType;
   --area predestinata
       r_area_min c_aree%RowType;
+      r_area_min_aut c_aree_aut%RowType;
   begin
   --reperisco caratteristiche del veicolo
       select lunghezza, larghezza, altezza,   peso,     alimentazione
@@ -1825,27 +1934,48 @@ procedure procCronologia(id_Sessione varchar2, nome varchar2, ruolo varchar2) is
           from veicoli
           where idVeicolo=Vei;
       if SQL%NotFound then return null; end if;
-      open c_aree;
-      fetch c_aree into r_area_min;
-      if c_aree%NotFound then return null; end if;
-  --non uso ciclo for perche mi serve la prima tupla
-      loop
-      --tra tutte le aree che possono contenere il veicolo prendo la piu piccola.
-      --le aree sono inserite mantenendo una certa proprieta' "matrioska",quindi considero tutti i valori
-          fetch c_aree into r_area;
-          exit when c_aree%NotFound;
-          if
-              r_area.lunghezzaMax <= r_area_min.lunghezzaMax and
-              r_area.larghezzaMax <= r_area_min.larghezzaMax and
-              r_area.altezzaMax <= r_area_min.altezzaMax and
-              r_area.pesoMax <= r_area_min.pesoMax
-          then r_area_min := r_area;
-          end if;
-      end loop;
-      return r_area_min.idArea;
-    exception
-        when no_data_found then
-            modGUI.apriPagina('HoC | Update Abbonamenti', 101, 'Cliente', 'C');
+
+      if Autorimessa = 'null' then
+          open c_aree;
+          fetch c_aree into r_area_min;
+          if c_aree%NotFound then return null; end if;
+      --non uso ciclo for perche mi serve la prima tupla
+          loop
+          --tra tutte le aree che possono contenere il veicolo prendo la piu piccola.
+          --le aree sono inserite mantenendo una certa proprieta' "matrioska",quindi considero tutti i valori
+              fetch c_aree into r_area;
+              exit when c_aree%NotFound;
+              if
+                  r_area.lunghezzaMax <= r_area_min.lunghezzaMax and
+                  r_area.larghezzaMax <= r_area_min.larghezzaMax and
+                  r_area.altezzaMax <= r_area_min.altezzaMax and
+                  r_area.pesoMax <= r_area_min.pesoMax
+              then r_area_min := r_area;
+              end if;
+          end loop;
+          return r_area_min.idArea;
+        else
+          num_autorimessa:= to_number(Autorimessa);
+          open c_aree_aut (num_autorimessa);
+          fetch c_aree_aut into r_area_min_aut;
+          if c_aree_aut%NotFound then return null; end if;
+      --non uso ciclo for perche mi serve la prima tupla
+          loop
+          --tra tutte le aree che possono contenere il veicolo prendo la piu piccola.
+          --le aree sono inserite mantenendo una certa proprieta' "matrioska",quindi considero tutti i valori
+              fetch c_aree_aut into r_area_aut;
+              exit when c_aree_aut%NotFound;
+              if
+                  r_area_aut.lunghezzaMax <= r_area_min_aut.lunghezzaMax and
+                  r_area_aut.larghezzaMax <= r_area_min_aut.larghezzaMax and
+                  r_area_aut.altezzaMax <= r_area_min_aut.altezzaMax and
+                  r_area_aut.pesoMax <= r_area_min_aut.pesoMax
+              then r_area_min_aut := r_area_aut;
+              end if;
+          end loop;
+          return r_area_min_aut.idArea;
+        end if;
+
 
 
   end Ass_area_min;
@@ -1853,51 +1983,138 @@ procedure procCronologia(id_Sessione varchar2, nome varchar2, ruolo varchar2) is
 
 
 
-
-  function ContrAbb (id_Cli in clienti.idCliente%type, id_Vei in veicoli.idVeicolo%type)
+function ContrAbb (id_Cli in clienti.idCliente%type, id_Vei in veicoli.idVeicolo%type, id_Aut autorimesse.idAutorimessa%type)
   return abbonamenti.idabbonamento%type as
     v_data_fine abbonamenti.DataFine%type;
     v_ora_inizio tipiabbonamenti.orafine%type;
     v_ora_fine tipiabbonamenti.orainizio%type;
     v_veicolo abbonamentiveicoli.idveicolo%type;
+    v_area aree.idArea%type;
+    cursor c_box (Abb abbonamenti.idAbbonamento%type, Area aree.idArea%type) is select box.idBox from box where box.idArea = Area and riservato='T' and box.idAbbonamento= Abb ;
+    v_box box.idBox%type;
+    c integer;
+    prenotato boolean;
     current_time timestamp:=LOCALTIMESTAMP();
     dataok boolean;
     fasciaok boolean;
     v_hour int;
+    primo int :=0;
   begin
   --unione abbonamenti che cliente possiede con abbonamenti che il cliente puo usare
     for id_abb in (select abbonamenti.idAbbonamento
-      from abbonamenti join clienti on abbonamenti.idCliente=clienti.idCliente
-      where clienti.idCliente = id_Cli
-      union
-    select AbbonamentiClienti.idAbbonamento
-      from clienti join AbbonamentiClienti on AbbonamentiClienti.idCliente=clienti.idCliente
-      where clienti.idCliente = id_Cli)
-      --non PUO USARE un abbonamento,ne ne possiede uno, quindi ritorno null
+                      from abbonamenti join clienti on abbonamenti.idCliente=clienti.idCliente
+                      where clienti.idCliente = id_Cli
+                    union
+                    select AbbonamentiClienti.idAbbonamento
+                      from clienti join AbbonamentiClienti on AbbonamentiClienti.idCliente=clienti.idCliente
+                      where clienti.idCliente = id_Cli
+    )
       loop
         --id_abb contiene un abbonamento che il cliente possiede o puo usare:
+
         --controllo che nei veicoli autorizzati per questo abbonamento sia presente il veicolo dato
-        select abbonamentiveicoli.idveicolo into v_veicolo
-          from AbbonamentiVeicoli join abbonamenti on AbbonamentiVeicoli.idAbbonamento =abbonamenti.idAbbonamento
-          where AbbonamentiVeicoli.idVeicolo= id_Vei and abbonamenti.idAbbonamento=id_Abb.idAbbonamento;
-        if sql%NotFound then goto loopend; end if;
+        select count(abbonamentiveicoli.idveicolo) into c
+          from AbbonamentiVeicoli join abbonamenti on AbbonamentiVeicoli.idAbbonamento = abbonamenti.idAbbonamento
+          where AbbonamentiVeicoli.idVeicolo = id_vei and abbonamenti.idAbbonamento = id_Abb.idAbbonamento;
+        if c=0 then goto loopend; end if;
+
         --id_abb contiene abbonamento utilizzabile oppure sono passato al prossimo abbonamento
+        --reperisco informazioni abbonamento
         select abbonamenti.DataFine, tipiabbonamenti.orainizio, tipiabbonamenti.orafine into v_data_fine, v_ora_inizio, v_ora_fine
          from abbonamenti join tipiabbonamenti on abbonamenti.idtipoabbonamento = tipiabbonamenti.idtipoabbonamento
          where abbonamenti.idAbbonamento = id_Abb.idAbbonamento;
+
+
         --controllo validita dati fetchati
-        dataok := v_data_fine < current_date;
+        if v_data_fine < current_date then
+            dataok := false;
+        else
+            dataok:=true;
+        end if;
         v_hour := EXTRACT(HOUR FROM current_time);
         fasciaok:= (v_hour >= v_ora_inizio) and (v_hour <= v_ora_fine);
+
         --se tutte le condizioni sono rispettate restituisco id abbonam.
-        if fasciaok and dataok then return id_abb.idAbbonamento; end if;
+        if (fasciaok=true) and (dataok=true) then
+            --abbonamento ok, se non ho un posto prenotato in questa autorimessa lo prenoto.
+            v_area := gruppo3.Ass_area_min(id_Vei, id_Aut);
+            open c_box (id_abb.idAbbonamento, v_area);
+            fetch c_box into v_box;
+            if c_box%NotFound then
+            --non ho un posto prenotato, provo a prenotarlo
+                prenotato := gruppo3.prenotaPosto(id_abb.idAbbonamento, id_Aut, v_area);
+                --se ho prenotato il posto ok
+                if prenotato = true then return id_abb.idAbbonamento;
+                --se non posso prenotare il posto non va bene
+                else return -1; end if;
+            else
+            --ho gia un posto prenotato, restituisco l'abbonamento
+                return id_abb.idAbbonamento;
+            end if;
+        end if;
         <<loopend>>
         fasciaok:=false;
         dataok:=false;
+        primo := primo+1;
       end loop;
-    --altrimenti null
-    return null;
+    --se non ho trovato nessun abbonamento valido null
+    return -primo -10;
+
+    exception
+        when no_data_found then return null;
+
   end ContrAbb;
+
+
+
+function prenotaPosto(
+    id_Abb abbonamenti.idAbbonamento%type,
+    id_Aut autorimesse.idAutorimessa%type,
+    id_Area aree.idArea%type
+)
+ return BOOLEAN is
+    MaxAut integer :=0;
+    ActAut integer :=0;
+    cursor c_box is select box.idBox from box join aree on box.idArea= aree.idArea where aree.idArea=id_Area and aree.idAutorimessa = id_aut and box.riservato= 'F';
+    v_box box.idBox%type;
+    trovato boolean;
+    BEGIN
+
+    --maxautorimesse consentito
+    select maxAutorimesse into MaxAut from TipiAbbonamenti join Abbonamenti on abbonamenti.idTipoAbbonamento=TipiAbbonamenti.idTipoAbbonamento where idAbbonamento = id_abb;
+
+    --autorimesse che sto usando
+    select count(distinct aree.idAutorimessa) into ActAut from box join aree on box.idArea =Aree.idArea where box.idAbbonamento = id_abb;
+
+    -- se ho gia raggiunto il massimo numero di autorimesse consentito non posso prenotare in una nuova autorimessa
+    if ( actaut = maxaut ) then
+        trovato:=false;
+    -- se sto inserendo nelle solite autorimesse tutto apposto
+        for autorimessa in (select distinct aree.idAutorimessa from box join aree on box.idArea = Aree.idArea where idAbbonamento = id_abb)
+        loop
+            if id_Aut = autorimessa.idAutorimessa then
+            trovato:=true;
+            end if;
+        end loop;
+    -- se sto inserendo in una autorimessa nuova non va bene
+        if trovato = false then return false; end if;
+    end if;
+    -- trovato = true => non sto eccedendo il numero di autorimesse
+    --adesso devo preontare il posto
+    open c_box;
+    fetch c_box into v_box;
+    if c_box%Found then
+        -- i posti in questa area non sono tutti prenotati, ne prenoto uno
+        update box set riservato='T', idAbbonamento=id_abb where idBox=v_box;
+        return true;
+    else
+        -- i posti in questa area sono tutti prenotati, non posso prenotare qui
+        return false;
+    end if;
+    --se sono riuscito a prenotare il posto ho restituito true, altrimenti false
+END;
+
+
 
 
 
@@ -1993,7 +2210,7 @@ end dettagliTipiAbb;
 
 
 
-procedure visualizzaTipiAbb(id_Sessione varchar2, nome varchar2, ruolo varchar2, idRiga varchar2 default 0) is
+procedure visualizzaTipiAbb(id_Sessione varchar2, nome varchar2, ruolo varchar2) is
 
 var_idtipoabb tipiabbonamenti.idTipoAbbonamento%TYPE;
 var_tipoabb tipiabbonamenti.TipoAbbonamento%TYPE;
@@ -2032,7 +2249,7 @@ begin
 				modGUI.intestazioneTabella('Operazioni');
 			modGUI.ChiudiRigaTabella;
 
-			open var_tipiabb; /* CURSORE APERTO, ----> USARE CURSORE ESPLICITO A QUESTO PUNTO??------*/
+			open var_tipiabb;
 
 			fetch var_tipiabb into var_idtipoabb, var_tipoabb, var_maxveicoli, var_maxclienti, var_maxautorimesse, var_durata, var_costo, var_orainizio, var_orafine;
 
@@ -2069,7 +2286,9 @@ begin
 					modGUI.ChiudiElementoTabella;
 					modGUI.ApriElementoTabella;
 						modGUI.inserisciLente('gruppo3.dettagliTipiAbb', id_Sessione, nome, ruolo, var_idtipoabb);
+						if(ruolo = 'R') then
 						modGUI.inserisciPenna('gruppo3.modificaTipiAbb', id_Sessione, nome, ruolo, var_idtipoabb);
+						end if;
 					modGUI.ChiudiElementoTabella;
 				modGUI.ChiudiRigaTabella;
 				fetch var_tipiabb into var_idtipoabb, var_tipoabb, var_maxveicoli, var_maxclienti, var_maxautorimesse, var_durata, var_costo, var_orainizio, var_orafine;
@@ -2080,12 +2299,14 @@ begin
 		modGUI.ChiudiTabella;
 	modGUI.chiudiDiv;
 
+	if(ruolo = 'R') then
 	modGUI.apriIntestazione(3);
 		modGUI.inserisciTesto('ALTRE OPERAZIONI');
 	modGUI.chiudiIntestazione(3);
 	modGUI.apriDiv(centrato=>true);
-		modGUI.inserisciBottone(id_Sessione, nome, ruolo, 'Inserisci Tipo Abbonamento', 'gruppo3.inserisciTipiAbb', 'defFormButton');
+		modGUI.inserisciBottone(id_Sessione, nome, ruolo, 'Inserisci Tipo Abbonamento', 'inserisciTipiAbb', 'defFormButton');
 	modGUI.chiudiDiv;
+	end if;
 
  modGUI.chiudiPagina;
 
@@ -2098,7 +2319,7 @@ begin
         	modGUI.chiudiIntestazione(2);
 			modGUI.aCapo;
 			modGUI.apriIntestazione(3);
-			modGUI.inserisciTesto('Non è presente nessun tipo di gruppo3.');
+			modGUI.inserisciTesto('Non è presente nessun tipo di abbonamento.');
 			modGUI.chiudiIntestazione(3);
         end;
 
@@ -2378,11 +2599,14 @@ end IntroitiAbbonamenti;
 
 procedure Lista_Veicoli_Abbonamento(id_Sessione int, nome varchar2, ruolo varchar2,abb abbonamenti.idAbbonamento%type)
 as
-    v_cli Clienti.idCliente%type;
+    v_cli_att Clienti.idCliente%type;
+    v_cli_prop Clienti.idCliente%type;
+    v_tipo_abb TipiAbbonamenti.TipoAbbonamento%type;
+    v_fine_abb abbonamenti.DataFine%type;
     v_count integer;
         cursor c_veicoli_prop is (select produttore, modello, colore, targa , veicoli.idVeicolo
             from VeicoliClienti join Veicoli on VeicoliClienti.idVeicolo=veicoli.idVeicolo
-            where veicoliClienti.idCliente= v_cli);
+            where veicoliClienti.idCliente= v_cli_prop);
     r_veicolo c_veicoli_prop%RowType;
     cursor c_veicoli_aut is (
     select produttore, modello, colore, targa , veicoli.idVeicolo, Persone.nome as nomev, Persone.cognome as cognomev
@@ -2393,22 +2617,29 @@ as
                 from AbbonamentiClienti join clienti on AbbonamentiClienti.idcliente=Clienti.idCliente
                 where AbbonamentiClienti.idAbbonamento=abb
                 )
-                --and VeicoliClienti.idCliente != v_cli
+                --and VeicoliClienti.idCliente != v_cli_prop
                 and VeicoliClienti.idVeicolo not in (select VeicoliClienti.idVeicolo
                     from VeicoliClienti
-                    where VeicoliClienti.idCliente = v_cli)
+                    where VeicoliClienti.idCliente = v_cli_prop)
     );
     r_veicoli_aut c_veicoli_aut%RowType;
 begin
 --si rompe se utete possiede piu di un abbonamento bisogna fare un abbonamento_pre per far specificare quale abbonamento si vuole usare
-    select Clienti.idCliente into v_cli
+    select Clienti.idCliente, Tipiabbonamenti.TipoAbbonamento, abbonamenti.DataFine into v_cli_prop, v_tipo_abb, v_fine_abb
         from Abbonamenti join Clienti on Abbonamenti.idCliente=Clienti.idCliente
+         join TipiAbbonamenti on abbonamenti.idTipoAbbonamento = TipiAbbonamenti.idTipoAbbonamento
          where abbonamenti.idAbbonamento=abb;
+    select Clienti.idCliente
+      into v_cli_att
+      from sessioni, clienti
+      where id_Sessione = sessioni.idSessione and
+            sessioni.idPersona = clienti.idPersona;
+
     modGUI.apriPagina('HoC | Lista Veicoli', id_Sessione, nome, ruolo);
         modGUI.aCapo;
-        modGUI.apriIntestazione(1);
-            modGUI.inserisciTesto('Lista Veicoli');
-        modGUI.chiudiIntestazione(1);
+        modGUI.apriIntestazione(2);
+            modGUI.inserisciTesto('Lista Veicoli per abbonamento '||v_tipo_abb||' in scadenza il '||v_fine_abb);
+        modGUI.chiudiIntestazione(2);
         modGUI.apriDiv;
           modGUI.apriIntestazione(2);
             modGUI.inserisciTesto('veicoli proprietario: ');
@@ -2420,8 +2651,10 @@ begin
               modgui.intestazionetabella('produttore');
               modgui.intestazionetabella('modello');
               modgui.intestazionetabella('targa');
-              modgui.intestazionetabella('inserisci');
-              modgui.intestazionetabella('rimuovi');
+              if v_cli_att = v_cli_prop then
+                modgui.intestazionetabella('inserisci');
+                modgui.intestazionetabella('rimuovi');
+              end if;
               loop
                 modgui.apririgatabella;
                 modGUI.apriElementoTabella;
@@ -2433,23 +2666,25 @@ begin
                 modGUI.apriElementoTabella;
                     modgui.inseriscitesto(r_veicolo.targa);
                 modgui.chiudielementotabella;
-                select count(*) into v_count from AbbonamentiVeicoli where idAbbonamento=abb and idVeicolo=r_veicolo.idVeicolo;
-                    if v_count = 0 then
-                        modGUI.apriElementoTabella;
-                        modGui.inserisciPenna('gruppo3.Pagamento_Inserimento_veicolo', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abb );
-                        modgui.chiudiElementotabella;
-                        modGUI.apriElementoTabella;
-                        modgui.inserisciTesto('non presente');
-                        modgui.chiudiElementotabella;
-                    else
-                        modGUI.apriElementoTabella;
-                        modGui.InserisciTesto('presente');
-                        modgui.chiudiElementotabella;
-                        modGUI.apriElementoTabella;
-                        modGui.inserisciPenna('gruppo3.Rimuovi_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abb);
-                        modgui.chiudiElementotabella;
-                    end if;
-                modgui.chiudielementotabella;
+                if v_cli_att = v_cli_prop then
+                    select count(*) into v_count from AbbonamentiVeicoli where idAbbonamento=abb and idVeicolo=r_veicolo.idVeicolo;
+                        if v_count = 0 then
+                            modGUI.apriElementoTabella;
+                            modGui.inserisciPenna('gruppo3.Autorim_ins_veicolo', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abb );
+                            modgui.chiudiElementotabella;
+                            modGUI.apriElementoTabella;
+                            modgui.inserisciTesto('non presente');
+                            modgui.chiudiElementotabella;
+                        else
+                            modGUI.apriElementoTabella;
+                            modGui.InserisciTesto('presente');
+                            modgui.chiudiElementotabella;
+                            modGUI.apriElementoTabella;
+                            modGui.inserisciPenna('gruppo3.Rimuovi_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicolo.idVeicolo||' '||abb);
+                            modgui.chiudiElementotabella;
+                        end if;
+                    modgui.chiudielementotabella;
+                end if;
                 modgui.chiudirigatabella;
               fetch c_veicoli_prop into r_veicolo;
               exit when c_veicoli_prop%NotFound;
@@ -2473,8 +2708,10 @@ begin
             modgui.intestazionetabella('modello');
             modgui.intestazionetabella('targa');
             modgui.intestazionetabella('proprietario');
-            modgui.intestazionetabella('inserisci');
-            modgui.intestazionetabella('rimuovi');
+            if v_cli_att = v_cli_prop then
+                modgui.intestazionetabella('inserisci');
+                modgui.intestazionetabella('rimuovi');
+            end if;
             loop
                 modgui.apririgatabella;
                 modGUI.apriElementoTabella;
@@ -2489,22 +2726,24 @@ begin
                 modGUI.apriElementoTabella;
                     modgui.inseriscitesto(r_veicoli_aut.nomev||' '||r_veicoli_aut.cognomev);
                 modgui.chiudielementotabella;
-                select count(*) into v_count from AbbonamentiVeicoli where idAbbonamento=abb and idVeicolo=r_veicoli_aut.idVeicolo;
-                    if v_count = 0 then
-                        modGUI.apriElementoTabella;
-                        modGui.inserisciPenna('gruppo3.Inserisci_veicolo_abbonamento2', id_Sessione, nome, ruolo, r_veicoli_aut.idVeicolo||' '||abb );
-                        modgui.chiudiElementotabella;
-                        modGUI.apriElementoTabella;
-                        modgui.inserisciTesto('non presente');
-                        modgui.chiudiElementotabella;
-                    else
-                        modGUI.apriElementoTabella;
-                        modGui.InserisciTesto('presente');
-                        modgui.chiudiElementotabella;
-                        modGUI.apriElementoTabella;
-                        modGui.inserisciPenna('gruppo3.Rimuovi_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicoli_aut.idVeicolo||' '||abb);
-                        modgui.chiudiElementotabella;
-                    end if;
+                if v_cli_att = v_cli_prop then
+                    select count(*) into v_count from AbbonamentiVeicoli where idAbbonamento=abb and idVeicolo=r_veicoli_aut.idVeicolo;
+                        if v_count = 0 then
+                            modGUI.apriElementoTabella;
+                            modGui.inserisciPenna('gruppo3.Inserisci_veicolo_abbonamento2', id_Sessione, nome, ruolo, r_veicoli_aut.idVeicolo||' '||abb );
+                            modgui.chiudiElementotabella;
+                            modGUI.apriElementoTabella;
+                            modgui.inserisciTesto('non presente');
+                            modgui.chiudiElementotabella;
+                        else
+                            modGUI.apriElementoTabella;
+                            modGui.InserisciTesto('presente');
+                            modgui.chiudiElementotabella;
+                            modGUI.apriElementoTabella;
+                            modGui.inserisciPenna('gruppo3.Rimuovi_veicolo_abbonamento', id_Sessione, nome, ruolo, r_veicoli_aut.idVeicolo||' '||abb);
+                            modgui.chiudiElementotabella;
+                        end if;
+                end if;
                 modgui.chiudielementotabella;
                 modgui.chiudirigatabella;
                 fetch c_veicoli_aut into r_veicoli_aut;

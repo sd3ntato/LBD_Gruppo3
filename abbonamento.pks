@@ -86,11 +86,20 @@ procedure IntroitiAbbonamenti(
 
 --veicoli
 
-procedure Pagamento_Inserimento_veicolo(
+procedure Autorim_ins_veicolo(
     id_Sessione int,
     nome varchar2,
     ruolo varchar2,
     idRiga varchar2
+);
+
+procedure Pagamento_Inserimento_veicolo(
+    id_Sessione int,
+    nome varchar2,
+    ruolo varchar2,
+    Abb abbonamenti.idAbbonamento%type,
+    Vei veicoli.idVeicolo%type,
+    Autorimessa varchar2
 );
 
 procedure Inserisci_veicolo_abbonamento(
@@ -99,7 +108,7 @@ procedure Inserisci_veicolo_abbonamento(
     ruolo varchar2,
     Abb Abbonamenti.idAbbonamento%type,
     Vei Veicoli.idVeicolo%type,
-    Costo abbonamenti.CostoEffettivo%type
+    Area aree.idArea%type
 );
 
 procedure Rimuovi_veicolo_abbonamento(
@@ -193,33 +202,45 @@ procedure procCronologia(
   procedure Parcheggio_Abb(
       IdAbb abbonamenti.idAbbonamento%type,
       IdVei veicoli.idVeicolo%type,
-      IdCli clienti.idcliente%type
+      IdCli clienti.idcliente%type,
+      IdAut autorimesse.idAutorimessa%type
   );
 
 procedure ritiro_abbonati(Vei veicoli.idVeicolo%type);
 
 --assegna minima area adatta a contenere il veicolo
   function Ass_area_min(
-      Vei veicoli.idVeicolo%type
+      Vei veicoli.idVeicolo%type,
+      Autorimessa varchar2 default 'null'
   )
   return aree.idArea%type;
 
 -- Controlla la validita' dell'abbonamento dato per il cliente e per il veicolo:
--- Se l'abbonamento risulta valido ritorna l'id dell'abbonamento utilizzabile dalla coppia
--- (cliente,veicolo), motivi per cui abbonamento puo non essere valido:
+-- Se l'abbonamento risulta valido ritorna l'id dell'abbonamento utilizzabile dalla coppia (cliente,veicolo)
+-- motivi per cui abbonamento puo non essere valido:
 --      - cliente non possiede ne puo usare alcun abbonamento
 --      - veicolo non puo usare abbonamento trovato
 --      - abbonamento scaduto
 --      - orario attuale fuori fascia oraria di validita abbonamento
-  function ContrAbb ( id_Cli in clienti.idCliente%type, id_Vei in veicoli.idVeicolo%type )
+  function ContrAbb (
+    id_Cli in clienti.idCliente%type,
+    id_Vei in veicoli.idVeicolo%type,
+    id_Aut in autorimesse.idAutorimessa%type
+)
   return abbonamenti.idabbonamento%type;
 
+function prenotaPosto(
+    id_Abb abbonamenti.idAbbonamento%type,
+    id_Aut autorimesse.idAutorimessa%type,
+    id_Area aree.idArea%type
+)
+ return BOOLEAN;
 
 --tipiAbbonamenti
 
 procedure dettagliTipiAbb(id_Sessione varchar2, nome varchar2, ruolo varchar2, idRiga varchar2);
 
-procedure visualizzaTipiAbb(id_Sessione varchar2, nome varchar2, ruolo varchar2, idRiga varchar2 default 0);
+procedure visualizzaTipiAbb(id_Sessione varchar2, nome varchar2, ruolo varchar2);
 
 procedure modificaTipiAbb(id_Sessione varchar2, nome varchar2, ruolo varchar2, idRiga varchar2);
 
